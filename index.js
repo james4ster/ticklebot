@@ -9,15 +9,18 @@ import { nhlEmojiMap } from './nhlEmojiMap.js'; // still used locally if needed
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // GAS URLs
+=======
+// === Replace with your deployed Google Apps Script URLs ===
 const gaUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=ga';
 const gfUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=gf';
 const shutoutsUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=shutouts';
 
+// === Bot Online Confirmation ===
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-// Slash command handler
+// === Slash Command Handler ===
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
@@ -44,6 +47,10 @@ client.on('interactionCreate', async interaction => {
     } catch (error) {
       console.error('❌ Error running reports:', error);
       await interaction.editReply('❌ I messed up.');
+      await interaction.editReply('🎤 Listen....Here are your reports. My Name is Ed and I love dragons!');
+    } catch (error) {
+      console.error('❌ Error running reports:', error);
+      await interaction.editReply('❌ I messed up running your reports.');
     }
   }
 
@@ -54,6 +61,10 @@ client.on('interactionCreate', async interaction => {
 
 // === Slash Command Registration (Uncomment and run once to register commands) ===
 
+
+
+/*
+>>>>>>> 4d8aead (Save local changes before rebase)
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
 (async () => {
@@ -74,18 +85,23 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
       { body: commands }
     );
 
+
     console.log('✅ Slash commands registered.');
   } catch (error) {
     console.error('❌ Error registering commands:', error);
+
+    console.log('✅ Successfully reloaded application (/) commands.');
+  } catch (error) {
+    console.error('❌ Failed to register slash commands:', error);
+
   }
 })();
 
 
-// === Express server to keep Replit awake ===
+// === Express Server to Keep Replit Awake ===
 const app = express();
-
 app.get('/', (req, res) => {
-  res.send('TickleBot is alive!');
+  res.send('🟢 TickleBot is alive and ready to serve!');
 });
 
 const PORT = process.env.PORT || 3000;
