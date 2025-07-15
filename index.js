@@ -1,18 +1,20 @@
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import express from 'express';
-import { nhlEmojiMap } from './nhlEmojiMap.js';
+
+import { handleScheduleCommand } from './schedule.js'; // <== newly modularized
+import { nhlEmojiMap } from './nhlEmojiMap.js'; // still used locally if needed
 
 // === Discord Bot Setup ===
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Replace with your Google Apps Script URLs
+// GAS URLs
 const gaUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=ga';
 const gfUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=gf';
 const shutoutsUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=shutouts';
 
 client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
 // Slash command handler
@@ -38,42 +40,46 @@ client.on('interactionCreate', async interaction => {
         }
       }
 
-      await interaction.editReply('Listen....Here are your reports. My Name is Ed and I love dragons!');
-
+      await interaction.editReply('Listen....Here are your reports. My name is Ed and I love dragons!');
     } catch (error) {
-      console.error('Error running reports:', error);
-      await interaction.editReply('❌ I fucked up.');
+      console.error('❌ Error running reports:', error);
+      await interaction.editReply('❌ I messed up.');
     }
+  }
+
+  if (interaction.commandName === 'schedule') {
+    return handleScheduleCommand(interaction); // ⬅️ Calls your modular /schedule logic
   }
 });
 
-/* 
-// === Slash Command Registration (Uncomment and run once to register) ===
+// === Slash Command Registration (Uncomment and run once to register commands) ===
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
 (async () => {
   try {
-    console.log('Started refreshing application (/) commands.');
+    console.log('🚀 Registering slash commands...');
 
     const commands = [
       new SlashCommandBuilder()
         .setName('reports')
-        .setDescription('Run all the reports')
-        .toJSON()
-    ];
+        .setDescription('Run all the reports'),
+      new SlashCommandBuilder()
+        .setName('schedule')
+        .setDescription('Get your remaining opponents')
+    ].map(cmd => cmd.toJSON());
 
     await rest.put(
       Routes.applicationCommands(process.env.CLIENT_ID),
-      { body: commands },
+      { body: commands }
     );
 
-    console.log('Successfully reloaded application (/) commands.');
+    console.log('✅ Slash commands registered.');
   } catch (error) {
-    console.error(error);
+    console.error('❌ Error registering commands:', error);
   }
 })();
-*/
+
 
 // === Express server to keep Replit awake ===
 const app = express();
