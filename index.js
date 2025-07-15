@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import express from 'express';
+import { nhlEmojiMap } from './nhlEmojiMap.js';
 
 // === Discord Bot Setup ===
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
