@@ -1,32 +1,21 @@
-{
-<<<<<<< HEAD
-  "name": "ticklebot",
-  "version": "1.0.0",
-  "description": "Discord bot for /reports",
-  "type": "module",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-=======
-  "name": "nodejs",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
->>>>>>> 941402e (Initial commit)
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-<<<<<<< HEAD
-    "discord.js": "^14.21.0",
-    "dotenv": "^17.2.0",
-    "express": "^5.1.0",
-    "node-fetch": "^3.3.2"
-=======
-    "@types/node": "^22.13.11"
->>>>>>> 941402e (Initial commit)
+  {
+    "name": "ticklebot",
+    "version": "1.0.0",
+    "description": "Discord bot for /reports",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "discord.js": "^14.21.0",
+      "dotenv": "^17.2.0",
+      "express": "^5.1.0",
+      "node-fetch": "^3.3.2",
+      "@types/node": "^22.13.11"
+    }
   }
-}
