@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import express from 'express';
 
 import { handleScheduleCommand } from './schedule.js';
-import { nhlEmojiMap } from './nhlEmojiMap.js'; // still used locally if needed
+import { nhlEmojiMap } from './nhlEmojiMap.js';
 
 // === Discord Bot Setup ===
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -24,28 +24,33 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
   if (interaction.commandName === 'reports') {
-    await interaction.deferReply();
+    // 1. Acknowledge the command privately (ephemeral) to avoid "This interaction failed"
+    await interaction.reply({ content: '📡 Running reports...', ephemeral: true });
 
     try {
+      // 2. Fetch all 3 reports
       const responses = await Promise.all([
         fetch(gaUrl),
         fetch(gfUrl),
         fetch(shutoutsUrl)
       ]);
 
-      for (const res of responses) {
-        const text = await res.text();
-        if (res.ok) {
-          console.log('✅ GAS response:', text.substring(0, 200));
-        } else {
-          console.error('❌ GAS error:', res.status, text.substring(0, 200));
-        }
-      }
+      const texts = await Promise.all(responses.map(res => res.text()));
 
-      await interaction.editReply('🎤 Listen....Here are your reports. My name is Ed and I love dragons!');
+      // 3. Optional: Log GAS results
+      texts.forEach((text, i) => {
+        const label = ['GA', 'GF', 'Shutouts'][i];
+        console.log(`✅ ${label} Response:\n`, text.substring(0, 200));
+      });
+
+      // 4. Post in the same channel where the command was triggered
+      await interaction.channel.send({
+        content: `🎤 **Here are your reports**\n\n📊 **Goals Against**\n${texts[0]}\n\n🚀 **Goals For**\n${texts[1]}\n\n🧱 **Shutouts**\n${texts[2]}`
+      });
+
     } catch (error) {
       console.error('❌ Error running reports:', error);
-      await interaction.editReply('❌ I messed up running your reports.');
+      await interaction.channel.send('❌ I messed up running your reports.');
     }
   }
 
