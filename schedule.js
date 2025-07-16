@@ -5,7 +5,7 @@ export async function handleScheduleCommand(interaction) {
     await interaction.deferReply();
 
     const discordId = interaction.user.id;
-    const url = `https://script.google.com/macros/s/AKfycbxxoYEoY7oEuVCpxCUaAQP9u04zbatejY4DfY-BmCeRUEgCsitxtefaWfJg-29S83dr/exec?report=schedule&discordId=${discordId}`;
+    const url = `https://script.google.com/macros/s/AKfycbxJ8sllUfOitVMVESCTvlsOjlSBEAZL6z_bNjxaQ8_XdBw4OeEczJ_zFlkFToWRZJQL/exec?report=schedule&discordId=${discordId}`;
 
     const res = await fetch(url);
     const json = await res.json();
@@ -14,7 +14,7 @@ export async function handleScheduleCommand(interaction) {
       return interaction.editReply(`❌ Failed to fetch your schedule: ${json.error}`);
     }
 
-    const { record, schedule, userTeam } = json.data;
+    const { record, schedule, userTeam, allTimeRecords } = json.data;
     if (!schedule) {
       return interaction.editReply('❌ No schedule data found for your team.');
     }
@@ -46,7 +46,15 @@ export async function handleScheduleCommand(interaction) {
       message += `__**Losses:**__\n${schedule.losses.map(formatGame).join('\n')}\n\n`;
     }
     if (schedule.unplayed.length) {
-      message += `__**Upcoming Games:**__\n${schedule.unplayed.map(formatGame).join('\n')}`;
+      message += `__**Upcoming Games:**__\n${schedule.unplayed.map(formatGame).join('\n')}\n\n`;
+    }
+
+    // New Section: All-Time Record vs Remaining Opponents (managers)
+    if (allTimeRecords && Object.keys(allTimeRecords).length) {
+      message += `__**All Time Record vs Upcoming Opponents:**__\n`;
+      for (const [manager, record] of Object.entries(allTimeRecords)) {
+        message += `- ${manager}: ${record.wins}-${record.losses}-${record.ties}\n`;
+      }
     }
 
     await interaction.editReply(message);
