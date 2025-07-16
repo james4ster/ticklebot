@@ -38,7 +38,7 @@ client.on('interactionCreate', async interaction => {
 
       // Send embeds in the same channel
       await interaction.editReply({
-        content: '🎤 Here are your reports:',
+        content: '🎤 Listen....Here are your reports. My name is Ed and I love dragons!',
         embeds: [
           {
             title: "🛡️ All-Time Goals Against per Game (Min 30 GP)",
@@ -78,10 +78,10 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
     const commands = [
       new SlashCommandBuilder()
         .setName('reports')
-        .setDescription('Run all the reports'),
+        .setDescription('Ask Ed to run some reports'),
       new SlashCommandBuilder()
         .setName('schedule')
-        .setDescription('Get your remaining opponents')
+        .setDescription('Ask Ed to show your schedule')
     ].map(cmd => cmd.toJSON());
 
     await rest.put(
