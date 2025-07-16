@@ -10,9 +10,9 @@
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
   // === GAS URLs ===
-  const gaUrl = 'https://script.google.com/macros/s/AKfycbw8rUbLDZ6OCBQQomrrA-mwIOiqlR0ovxEVxdN_rg6u2eCAn1yMo_s4EsnwITdz8puJ/exec?report=ga';
-  const gfUrl = 'https://script.google.com/macros/s/AKfycbw8rUbLDZ6OCBQQomrrA-mwIOiqlR0ovxEVxdN_rg6u2eCAn1yMo_s4EsnwITdz8puJ/exec?report=gf';
-  const shutoutsUrl = 'https://script.google.com/macros/s/AKfycbw8rUbLDZ6OCBQQomrrA-mwIOiqlR0ovxEVxdN_rg6u2eCAn1yMo_s4EsnwITdz8puJ/exec?report=shutouts';
+  const gaUrl = 'https://script.google.com/macros/s/AKfycbxBqcP0J7vEfC-EavBD7kKMLP8wzjTymGoys5pgZwLD-TYokBEb5e3j7dL_dpOdFyiA/exec?report=ga';
+  const gfUrl = 'https://script.google.com/macros/s/AKfycbxBqcP0J7vEfC-EavBD7kKMLP8wzjTymGoys5pgZwLD-TYokBEb5e3j7dL_dpOdFyiA/exec?report=gf';
+  const shutoutsUrl = 'https://script.google.com/macros/s/AKfycbxBqcP0J7vEfC-EavBD7kKMLP8wzjTymGoys5pgZwLD-TYokBEb5e3j7dL_dpOdFyiA/exec?report=shutouts';
 
   // === Bot Online Confirmation ===
   client.once('ready', () => {
