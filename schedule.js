@@ -5,7 +5,7 @@ export async function handleScheduleCommand(interaction) {
     await interaction.deferReply();
 
     const discordId = interaction.user.id;
-    const url = `https://script.google.com/macros/s/AKfycbw8rUbLDZ6OCBQQomrrA-mwIOiqlR0ovxEVxdN_rg6u2eCAn1yMo_s4EsnwITdz8puJ/exec?report=schedule&discordId=${discordId}`;
+    const url = `https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec?report=schedule&discordId=${discordId}`;
 
     const res = await fetch(url);
     const json = await res.json();
@@ -14,14 +14,15 @@ export async function handleScheduleCommand(interaction) {
       return interaction.editReply(`❌ Failed to fetch your schedule: ${json.error}`);
     }
 
-    const { record, schedule, userTeam, allTimeRecords } = json.data;
+    const { record, schedule, userTeam, allTimeVsUpcoming, managerToTeam } = json.data;
+
     if (!schedule) {
       return interaction.editReply('❌ No schedule data found for your team.');
     }
 
     const emoji = (team) => nhlEmojiMap[team] || team;
 
-    let message = `__**Here Is Your Schedule. Want To Watch Game Of Thrones With Me?**__\n\n`;
+    let message = `__**Here Is Your Schedule:**__\n\n`;
 
     // Include record
     message += `**Record:** ${record.wins}-${record.losses}-${record.ties}\n\n`;
@@ -49,15 +50,18 @@ export async function handleScheduleCommand(interaction) {
       message += `__**Upcoming Games:**__\n${schedule.unplayed.map(formatGame).join('\n')}\n\n`;
     }
 
-    // New Section: All-Time Record vs Remaining Opponents (managers)
-    if (allTimeRecords && Object.keys(allTimeRecords).length) {
+    // All-Time Record vs Upcoming Opponents with NHL Emojis
+    if (allTimeVsUpcoming && Object.keys(allTimeVsUpcoming).length) {
       message += `__**All Time Record vs Upcoming Opponents:**__\n`;
-      for (const [manager, record] of Object.entries(allTimeRecords)) {
-        message += `- ${manager}: ${record.wins}-${record.losses}-${record.ties}\n`;
+      for (const [manager, record] of Object.entries(allTimeVsUpcoming)) {
+        const team = managerToTeam[manager];                  // Get their *current* team
+        const teamEmoji = team ? nhlEmojiMap[team] || '' : ''; // Map to emoji (fallback to empty)
+        message += `- ${teamEmoji} ${manager}: ${record.wins}-${record.losses}-${record.ties}\n`;
       }
     }
 
     await interaction.editReply(message);
+
   } catch (error) {
     console.error('❌ Error in handleScheduleCommand:', error);
     if (interaction.deferred || interaction.replied) {
