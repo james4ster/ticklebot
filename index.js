@@ -10,9 +10,9 @@ import { nhlEmojiMap } from './nhlEmojiMap.js';
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // === GAS URLs ===
-const gaUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=ga';
-const gfUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=gf';
-const shutoutsUrl = 'https://script.google.com/macros/s/AKfycbxMleuxVvUA1SphdI5xD9RNOaCkZ40UQi_6SZuYnUFyX9ixgY3HZPDOvcDTYJaiKDoK/exec?report=shutouts';
+const gaUrl = 'https://script.google.com/macros/s/AKfycbyXJYTr-D3kUQ2ZoDL4_5Mr19baxphM0TkSnV6XX-J9QT4e52wP2V9iKB68BROnceY7/exec?report=ga';
+const gfUrl = 'https://script.google.com/macros/s/AKfycbyXJYTr-D3kUQ2ZoDL4_5Mr19baxphM0TkSnV6XX-J9QT4e52wP2V9iKB68BROnceY7/exec?report=gf';
+const shutoutsUrl = 'https://script.google.com/macros/s/AKfycbyXJYTr-D3kUQ2ZoDL4_5Mr19baxphM0TkSnV6XX-J9QT4e52wP2V9iKB68BROnceY7/exec?report=shutouts';
 
 // === Bot Online Confirmation ===
 client.once('ready', () => {
@@ -24,33 +24,42 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
   if (interaction.commandName === 'reports') {
-    // 1. Acknowledge the command privately (ephemeral) to avoid "This interaction failed"
-    await interaction.reply({ content: '📡 Running reports...', ephemeral: true });
+    await interaction.deferReply();
 
     try {
-      // 2. Fetch all 3 reports
+      // Fetch all 3 chart URLs from GAS
       const responses = await Promise.all([
         fetch(gaUrl),
         fetch(gfUrl),
         fetch(shutoutsUrl)
       ]);
 
-      const texts = await Promise.all(responses.map(res => res.text()));
+      const [gaChartUrl, gfChartUrl, shutoutsChartUrl] = await Promise.all(responses.map(res => res.text()));
 
-      // 3. Optional: Log GAS results
-      texts.forEach((text, i) => {
-        const label = ['GA', 'GF', 'Shutouts'][i];
-        console.log(`✅ ${label} Response:\n`, text.substring(0, 200));
+      // Send embeds in the same channel
+      await interaction.editReply({
+        content: '🎤 Here are your reports:',
+        embeds: [
+          {
+            title: "🛡️ All-Time Goals Against per Game (Min 30 GP)",
+            image: { url: gaChartUrl },
+            color: 0xe74c3c
+          },
+          {
+            title: "🔥 All-Time Goals For per Game (Min 30 GP)",
+            image: { url: gfChartUrl },
+            color: 0x27ae60
+          },
+          {
+            title: "🥅 All Time Shutouts",
+            image: { url: shutoutsChartUrl },
+            color: 0x3498db
+          }
+        ]
       });
-
-      // 4. Post in the same channel where the command was triggered
-      await interaction.channel.send({
-        content: `🎤 **Here are your reports**\n\n📊 **Goals Against**\n${texts[0]}\n\n🚀 **Goals For**\n${texts[1]}\n\n🧱 **Shutouts**\n${texts[2]}`
-      });
-
     } catch (error) {
       console.error('❌ Error running reports:', error);
-      await interaction.channel.send('❌ I messed up running your reports.');
+      await interaction.editReply('❌ I messed up running your reports.');
     }
   }
 
