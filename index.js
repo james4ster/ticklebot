@@ -7,7 +7,13 @@ import { handleScheduleCommand } from './schedule.js';
 import { nhlEmojiMap } from './nhlEmojiMap.js';
 
 // === Discord Bot Setup ===
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
 
 // === GAS URLs ===
 const reportsUrl = 'https://script.google.com/macros/s/AKfycbxnXDsmWv-Rv7yU7nKeLh6vQ11r62DtevC-m1z3E05Hl0RnVwPQGlpRbntWo84IxfgF/exec?report=reports';
@@ -99,6 +105,16 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🌐 Web server running on port ${PORT}`);
+});
+
+// === Message Listener for "bs" and "down b" ===
+client.on('messageCreate', message => {
+  if (message.author.bot) return;
+
+  const msg = message.content.toLowerCase();
+  if (msg.includes('bs') || msg.includes('down b')) {
+    message.reply("📜 Per the #rules, down Bs are not allowed in this league. TY");
+  }
 });
 
 // === Login to Discord ===
