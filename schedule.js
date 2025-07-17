@@ -22,7 +22,7 @@ export async function handleScheduleCommand(interaction) {
 
     const emoji = (team) => nhlEmojiMap[team] || team;
 
-    let message = `__**Here Is Your Schedule:**__\n\n`;
+    let message = `__**My name is Ed and I my favorite movie is Niad:**__\n\n`;
 
     // Include record
     message += `**Record:** ${record.wins}-${record.losses}-${record.ties}\n\n`;
@@ -56,7 +56,7 @@ export async function handleScheduleCommand(interaction) {
       for (const [manager, record] of Object.entries(allTimeVsUpcoming)) {
         const team = managerToTeam[manager];                  // Get their *current* team
         const teamEmoji = team ? nhlEmojiMap[team] || '' : ''; // Map to emoji (fallback to empty)
-        message += `- ${teamEmoji} ${manager}: ${record.wins}-${record.losses}-${record.ties}\n`;
+        message += `${teamEmoji} ${manager}: ${record.wins}-${record.losses}-${record.ties}\n`;
       }
     }
 
