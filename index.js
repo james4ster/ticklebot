@@ -113,9 +113,10 @@ client.on('messageCreate', message => {
 
   const msg = message.content.toLowerCase();
   if (msg.includes('bs') || msg.includes('down b')) {
-    message.reply("📜 Per the #rules, down Bs are not allowed in this league. TY");
+    message.reply("🐺 Listen..... down Bs are not allowed in this league. If you want to watch a movie about an elderly woman swimming, I'll be your Huckleberry");
   }
 });
+
 
 // === Login to Discord ===
 client.login(process.env.DISCORD_TOKEN);
