@@ -1,4 +1,5 @@
 import { nhlEmojiMap } from './nhlEmojiMap.js';
+import { EmbedBuilder } from 'discord.js';
 
 export async function handleScheduleCommand(interaction) {
   try {
@@ -55,12 +56,16 @@ export async function handleScheduleCommand(interaction) {
       }
     }
 
-    const chunks = splitMessage(message, 2000);
+    const chunks = splitMessage(message, 4096); // Embed description limit
 
-    await interaction.editReply(chunks[0]);
+    const embeds = chunks.map(chunk =>
+      new EmbedBuilder().setDescription(chunk)
+    );
 
-    for (let i = 1; i < chunks.length; i++) {
-      await interaction.followUp(chunks[i]);
+    await interaction.editReply({ embeds: [embeds[0]] });
+
+    for (let i = 1; i < embeds.length; i++) {
+      await interaction.followUp({ embeds: [embeds[i]] });
     }
 
   } catch (error) {
@@ -73,7 +78,7 @@ export async function handleScheduleCommand(interaction) {
   }
 }
 
-function splitMessage(text, maxLength = 2000) {
+function splitMessage(text, maxLength = 4096) {
   const lines = text.split('\n');
   const chunks = [];
   let chunk = '';
