@@ -23,17 +23,13 @@ export async function handleScheduleCommand(interaction) {
     const emoji = (team) => nhlEmojiMap[team] || team;
 
     let message = `__**My name is Ed and my favorite movie is Nyad:**__\n\n`;
-
-    // Include record
     message += `**Record:** ${record.wins}-${record.losses}-${record.ties}\n\n`;
 
     const formatGame = (game) => {
       const opponent = game.opponent;
       const isHome = game.homeSide;
-
       const homeTeam = isHome ? userTeam : opponent;
       const awayTeam = isHome ? opponent : userTeam;
-
       const vsString = `${emoji(homeTeam)} ${homeTeam} vs ${emoji(awayTeam)} ${awayTeam}`;
       const score = game.scoreString || '- — -';
       const outcome = game.result === 'W' ? '✅' : game.result === 'L' ? '❌' : '';
@@ -50,17 +46,22 @@ export async function handleScheduleCommand(interaction) {
       message += `__**Upcoming Games:**__\n${schedule.unplayed.map(formatGame).join('\n')}\n\n`;
     }
 
-    // All-Time Record vs Upcoming Opponents with NHL Emojis
     if (allTimeVsUpcoming && Object.keys(allTimeVsUpcoming).length) {
       message += `__**All Time Record vs Upcoming Opponents:**__\n`;
       for (const [manager, record] of Object.entries(allTimeVsUpcoming)) {
-        const team = managerToTeam[manager];                  // Get their *current* team
-        const teamEmoji = team ? nhlEmojiMap[team] || '' : ''; // Map to emoji (fallback to empty)
+        const team = managerToTeam[manager];
+        const teamEmoji = team ? nhlEmojiMap[team] || '' : '';
         message += `${teamEmoji} ${manager}: ${record.wins}-${record.losses}-${record.ties}\n`;
       }
     }
 
-    await interaction.editReply(message);
+    const chunks = splitMessage(message, 2000);
+
+    await interaction.editReply(chunks[0]);
+
+    for (let i = 1; i < chunks.length; i++) {
+      await interaction.followUp(chunks[i]);
+    }
 
   } catch (error) {
     console.error('❌ Error in handleScheduleCommand:', error);
@@ -70,4 +71,21 @@ export async function handleScheduleCommand(interaction) {
       await interaction.reply('❌ Failed to fetch your schedule.');
     }
   }
+}
+
+function splitMessage(text, maxLength = 2000) {
+  const lines = text.split('\n');
+  const chunks = [];
+  let chunk = '';
+
+  for (const line of lines) {
+    if ((chunk + line + '\n').length > maxLength) {
+      chunks.push(chunk);
+      chunk = '';
+    }
+    chunk += line + '\n';
+  }
+
+  if (chunk) chunks.push(chunk);
+  return chunks;
 }
