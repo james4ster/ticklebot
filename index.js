@@ -22,7 +22,7 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
   if (interaction.commandName === 'reports') {
-    await interaction.reply({ content: '📡 Running reports...', ephemeral: true });
+    await interaction.reply({ content: '📡 Ed is getting your reports...', ephemeral: true });
 
     try {
       const res = await fetch(reportsUrl);
@@ -35,14 +35,14 @@ client.on('interactionCreate', async interaction => {
       const { ga, gf, shutouts } = json.data;
 
       await interaction.channel.send({
-        content: `🎤 **Here are your reports**`,
+        content: `🎤 **Listen... Here are your reports.  I love dragons! **`,
         embeds: [
           {
-            title: "📊 Goals Against per Game",
+            title: "📊 Goals Against per Game - Min 30 GP",
             image: { url: ga }
           },
           {
-            title: "🚀 Goals For per Game",
+            title: "🚀 Goals For per Game - Min 30 GP",
             image: { url: gf }
           },
           {
@@ -73,10 +73,10 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
     const commands = [
       new SlashCommandBuilder()
         .setName('reports')
-        .setDescription('Run all the reports'),
+        .setDescription('Ask Ed to run some reports'),
       new SlashCommandBuilder()
         .setName('schedule')
-        .setDescription('Get your remaining opponents')
+        .setDescription('Ask Ed to show your schedule')
     ].map(cmd => cmd.toJSON());
 
     await rest.put(
