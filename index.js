@@ -113,7 +113,7 @@ client.on('messageCreate', message => {
 
   const msg = message.content.toLowerCase();
 
-  // Check if either phrase appears — reply only once
+  // Check if either phrase appears — reply only once - forcing redeploy
   if (msg.includes('bs') || msg.includes('down b')) {
     message.reply("🐺 Listen..... down vaginoids are not allowed in this league. If you want to watch a movie about an elderly woman swimming, I'll be your Huckleberry");
   }
