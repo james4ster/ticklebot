@@ -107,19 +107,26 @@ app.listen(PORT, () => {
   console.log(`🌐 Web server running on port ${PORT}`);
 });
 
-// === Message Listener for "bs" and "down b" ===
+// === Message Listener for "bs" and "down b" with duplicate reply prevention ===
+const repliedMessages = new Set();
+
 client.on('messageCreate', message => {
-  if (message.author.bot) return;
+  if (message.author.bot) return; // ignore all bot messages
+
+  if (repliedMessages.has(message.id)) return; // prevent duplicate replies
 
   const msg = message.content.toLowerCase();
 
-  // Check if either phrase appears — reply only once - forcing redeploy
   if (msg.includes('bs') || msg.includes('down b')) {
+    repliedMessages.add(message.id);
     message.reply("🐺 Listen..... down vaginoids are not allowed in this league. If you want to watch a movie about an elderly woman swimming, I'll be your Huckleberry");
+
+    // Remove from cache after 10 minutes to prevent memory leak
+    setTimeout(() => {
+      repliedMessages.delete(message.id);
+    }, 10 * 60 * 1000);
   }
 });
-
-
 
 // === Login to Discord ===
 client.login(process.env.DISCORD_TOKEN);
