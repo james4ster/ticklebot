@@ -22,7 +22,7 @@ export async function handleScheduleCommand(interaction) {
 
     const emoji = (team) => nhlEmojiMap[team] || team;
 
-    let message = `__**My name is Ed and I my favorite movie is Niad:**__\n\n`;
+    let message = `__**My name is Ed and my favorite movie is Niad:**__\n\n`;
 
     // Include record
     message += `**Record:** ${record.wins}-${record.losses}-${record.ties}\n\n`;
