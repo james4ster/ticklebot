@@ -56,16 +56,20 @@ export async function handleScheduleCommand(interaction) {
       }
     }
 
-    const chunks = splitMessage(message, 4096); // Embed description limit
+    const chunks = splitMessage(message, 2000);
 
-    const embeds = chunks.map(chunk =>
-      new EmbedBuilder().setDescription(chunk)
-    );
+    if (chunks.length === 1) {
+      await interaction.editReply(chunks[0]);
+    } else {
+      const embed = new EmbedBuilder()
+        .setDescription(chunks[0]);
 
-    await interaction.editReply({ embeds: [embeds[0]] });
+      await interaction.editReply({ embeds: [embed] });
 
-    for (let i = 1; i < embeds.length; i++) {
-      await interaction.followUp({ embeds: [embeds[i]] });
+      for (let i = 1; i < chunks.length; i++) {
+        const followupEmbed = new EmbedBuilder().setDescription(chunks[i]);
+        await interaction.followUp({ embeds: [followupEmbed] });
+      }
     }
 
   } catch (error) {
@@ -78,7 +82,7 @@ export async function handleScheduleCommand(interaction) {
   }
 }
 
-function splitMessage(text, maxLength = 4096) {
+function splitMessage(text, maxLength = 2000) {
   const lines = text.split('\n');
   const chunks = [];
   let chunk = '';
