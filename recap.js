@@ -23,21 +23,19 @@ export async function generateSeasonRecap(teamStats) {
   }
 
   const prompt = `
-Write a hilarious, and slightly offensive season recap for this NHL '95 team in an online league.
+  Write a hilarious, and slightly offensive season recap for this NHL '95 team in an online league.
 
-Manager: ${teamStats.manager}
-Team: ${teamStats.teamName}
-Record: ${teamStats.record}
-Current Streak: ${teamStats.streak}
-Biggest Win: ${teamStats.biggestWin}
-Worst Loss: ${teamStats.worstLoss}
-Main Rival: ${teamStats.rival}
+  Manager: ${teamStats.manager}
+  Team: ${teamStats.teamName}
+  Record: ${teamStats.record}
+  Current Streak: ${teamStats.streak}
+  Current Place in Standings: ${teamStats.place}
 
-Make fun of their embarrassing losses and questionable coaching decisions. This is from the NHL '95 SEGA game, so reference those players and teams.
-Taunt them for their good plays like a jealous rival fan.
-Keep it under 150 words.
-Use the tone of a dramatic, unfiltered hockey blogger who thrives on chaos and chirping.
-Use humor, sarcasm, and spicy commentary.
+  Make fun of their embarrassing losses and questionable coaching decisions. This is from the NHL '95 SEGA game, so reference those players and teams.
+  Taunt them for their good plays like a jealous rival fan.
+  Keep it under 150 words.
+  Use the tone of a dramatic, unfiltered hockey blogger who thrives on chaos and chirping.
+  Use humor, sarcasm, and spicy commentary.
   `;
 
   try {
