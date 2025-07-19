@@ -5,6 +5,7 @@ import express from 'express';
 
 import { handleScheduleCommand } from './schedule.js';
 import { nhlEmojiMap } from './nhlEmojiMap.js';
+import { generateSeasonRecap } from './recap.js'; // <== Added import for recap function
 
 // === Discord Bot Setup ===
 const client = new Client({
@@ -96,8 +97,23 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
   }
 })();
 
-// === Express Server to Keep Replit Awake ===
+// === Express Server to Keep Replit Awake & API Route ===
 const app = express();
+app.use(express.json()); // <== Added middleware to parse JSON bodies
+
+// Add API endpoint to generate recap
+app.post('/api/generate-recap', async (req, res) => {
+  try {
+    const teamStats = req.body;
+    const recap = await generateSeasonRecap(teamStats);
+    res.send(recap);
+  } catch (err) {
+    console.error('Error generating recap:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Health check endpoint
 app.get('/', (req, res) => {
   res.send('🟢 TickleBot is alive and ready to serve!');
 });
