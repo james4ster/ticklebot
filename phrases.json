@@ -19,5 +19,21 @@
   {
     "triggers": ["seagull", "sea gull"],
     "response": "https://media.tenor.com/s9-xZILThyMAAAAC/seagull-screaming.gif"
+  },
+  {
+    "triggers": ["tisi", "there i said it"],
+    "response": "https://media.tenor.com/-n-Xa1wNoLgAAAAd/there-i-said-it-done.gif"
+  },
+  {
+    "triggers": ["grab a beer"],
+    "response": "🐺 I'm gonna grab one too."
+  },
+  {
+    "triggers": ["glhf", "gl hf", "gl", "good luck have fun"],
+    "response": "🐺 Wrong channel....TY"
+  },
+  {
+    "triggers": ["tecmo"],
+    "response": "🐺 Nobody cares about Tecmo Bowl....TY"
   }
 ]
