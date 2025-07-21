@@ -15,7 +15,7 @@ export const nhlEmojiMap = {
   "NYI": "<:NHLIslanders:1355925619031932960>",
   "NYR": "<:NHLRangers:1355925634232356865>",
   "OTT": "<:NHLSenators:1355925770786308247>",
-  "PHI": "<:NHLFlyers:1355925798728765641>",
+  "PHL": "<:NHLFlyers:1355925798728765641>",
   "PIT": "<:NHLPenguins:1355925785130569846>",
   "QUE": "<:NHLNordiques:EMOJI_ID>",      
   "SJS": "<:NHLSanJose:1355926534120145136>",         
