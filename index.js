@@ -123,26 +123,45 @@ app.listen(PORT, () => {
   console.log(`🌐 Web server running on port ${PORT}`);
 });
 
-// === Message Listener for "bs" and "down b" with duplicate reply prevention ===
+// === Dynamic Message Listener Using phrases.json ===
+import fs from 'fs';
+const phrases = JSON.parse(fs.readFileSync('./phrases.json', 'utf-8'));
+
 const repliedMessages = new Set();
 
-client.on('messageCreate', message => {
-  if (message.author.bot) return; // ignore all bot messages
+client.on('messageCreate', async message => {
+  // Added webhookId check here as requested
+  if (message.author.bot || message.webhookId) return;
+  if (repliedMessages.has(message.id)) return;
 
-  if (repliedMessages.has(message.id)) return; // prevent duplicate replies
+  // Optional: prevent responding to replies that mention a bot
+  if (message.reference) {
+    const repliedTo = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
+    if (repliedTo?.author?.bot) return;
+  }
 
   const msg = message.content.toLowerCase();
+  const channelName = message.channel?.name; // May be undefined in some contexts
 
-  if (msg.includes('bs') || msg.includes('down b')) {
-    repliedMessages.add(message.id);
-    message.reply("🐺 Listen..... down vaginoids are not allowed in this league. If you want to watch a movie about an elderly woman swimming, I'll be your Huckleberry");
+  for (const phraseObj of phrases) {
+    const triggers = phraseObj.triggers.map(trigger => trigger.toLowerCase());
+    const channelMatches = !phraseObj.channel || phraseObj.channel === channelName;
 
-    // Remove from cache after 10 minutes to prevent memory leak
-    setTimeout(() => {
-      repliedMessages.delete(message.id);
-    }, 10 * 60 * 1000);
+    if (channelMatches && triggers.some(trigger => msg.includes(trigger))) {
+      repliedMessages.add(message.id);
+      message.reply(phraseObj.response);
+
+      // Clear memory after 10 minutes
+      setTimeout(() => {
+        repliedMessages.delete(message.id);
+      }, 10 * 60 * 1000);
+
+      break;
+    }
   }
 });
+
+
 
 // === Login to Discord ===
 client.login(process.env.DISCORD_TOKEN);
