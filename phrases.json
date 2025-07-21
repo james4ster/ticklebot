@@ -15,5 +15,9 @@
   {
     "triggers": ["penalties"],
     "response": "🐺 This league will never have penalties numnuts"
+  },
+  {
+    "triggers": ["seagull", "sea gull"],
+    "response": "https://media.tenor.com/s9-xZILThyMAAAAC/seagull-screaming.gif"
   }
 ]
