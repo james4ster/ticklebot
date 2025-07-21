@@ -14,7 +14,7 @@
   },
   {
     "triggers": ["penalties"],
-    "response": "🐺 This league will never have penalties numnuts"
+    "response": "🐺 This league will never have penalties numnuts.  Unless you mean for not finishing games, we have those!"
   },
   {
     "triggers": ["seagull", "sea gull"],
