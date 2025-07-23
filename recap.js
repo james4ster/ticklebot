@@ -71,8 +71,8 @@ All-Time Ranks:
 - Points %: ${allTimePointsPctRank}
 - Goal Differential: ${allTimeGoalDiffRank}
 
-Keep it under 200 words.
-Use a dramatic, unfiltered hockey blogger voice that thrives on chaos and chirping.
+Keep it under 150 words.
+Use a highly sarcastic and dramatic, unfiltered hockey blogger voice that thrives on chaos and chirping.
 Use humor, sarcasm, and spicy commentary.
 `;
 
@@ -103,8 +103,6 @@ Use humor, sarcasm, and spicy commentary.
 
     // Plain text stats block (no backticks), placed at the top
     const statsBreakout = `
-Congrats on not quitting, ${manager}.
-
 ${nhlEmoji} ${team}
 Record: ${record}
 Current Streak: ${streak}
