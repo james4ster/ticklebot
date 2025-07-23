@@ -101,9 +101,8 @@ Use humor, sarcasm, and spicy commentary.
     const data = await response.json();
     const recapText = data.choices[0].message.content.trim();
 
-    // Append raw stat summary
+    // Plain text stats block (no backticks), placed at the top
     const statsBreakout = `
-\`\`\`
 Congrats on not quitting, ${manager}.
 
 ${nhlEmoji} ${team}
@@ -127,10 +126,10 @@ All-Time Ranks:
 - Most Losses: ${allTimeMostLossRank}
 - Points: ${allTimePointsRank}
 - Points %: ${allTimePointsPctRank}
-\`\`\`
 `;
 
-    return `${recapText}\n${statsBreakout}`;
+    // Return the stats block first, then the funny recap
+    return `${statsBreakout}\n${recapText}`;
 
   } catch (error) {
     console.error('Request failed:', error);
