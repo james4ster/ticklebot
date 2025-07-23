@@ -99,7 +99,38 @@ Use humor, sarcasm, and spicy commentary.
     }
 
     const data = await response.json();
-    return data.choices[0].message.content.trim();
+    const recapText = data.choices[0].message.content.trim();
+
+    // Append raw stat summary
+    const statsBreakout = `
+\`\`\`
+Congrats on not quitting, ${manager}.
+
+${nhlEmoji} ${team}
+Record: ${record}
+Current Streak: ${streak}
+Current Place: ${place}
+
+Goals For: ${gf} (Rank: ${goalsForRankSeason} | All-Time GF/G Rank: ${allTimeGoalsForPerGameRank})
+Goals Against: ${ga} (Rank: ${goalsAgainstRankSeason} | All-Time GA/G Rank: ${allTimeGoalsAgainstPerGameRank})
+Goal Differential: ${goaldiff} (Rank: ${goalDiffRankSeason} | All-Time Rank: ${allTimeGoalDiffRank})
+Shutouts: ${shutouts} (All-Time Rank: ${allTimeShutoutsRank})
+Penalty Points: ${penaltyPtsSeason}
+
+Season Ranks:
+- Wins: ${winsRankSeason}
+- Points: ${pointsRankSeason}
+- Points %: ${pointsPctRankSeason}
+
+All-Time Ranks:
+- Most Wins: ${allTimeMostWinsRank}
+- Most Losses: ${allTimeMostLossRank}
+- Points: ${allTimePointsRank}
+- Points %: ${allTimePointsPctRank}
+\`\`\`
+`;
+
+    return `${recapText}\n${statsBreakout}`;
 
   } catch (error) {
     console.error('Request failed:', error);
