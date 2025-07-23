@@ -105,8 +105,8 @@ Record: ${record}
 Current Streak: ${streak}
 Current Place: ${rank}
 
-Goals For: ${gf} (Rank: ${winsRankSeason} | All-Time Rank: ${goalsForRankSeason})
-Goals Against: ${ga} (Rank: ${lossesRankSeason} | All-Time Rank: ${goalsAgainstRankSeason})
+Goals For: ${gf} 
+Goals Against: ${ga}
 Goals For Per Game: ${goalsForPerGame.toFixed(2)} (Rank: ${goalsForRankSeason} | All-Time Rank: ${allTimeGoalsForPerGameRank})
 Goals Against Per Game: ${goalsAgainstPerGame.toFixed(2)} (Rank: ${goalsAgainstRankSeason} | All-Time Rank: ${allTimeGoalsAgainstPerGameRank})
 Goal Differential: ${goaldiff} (Rank: ${goalDiffRankSeason} | All-Time Rank: ${allTimeGoalDiffRank})
