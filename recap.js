@@ -10,7 +10,7 @@ export async function generateSeasonRecap(teamStats) {
     team = 'Unknown',
     record,
     streak,
-    place = 'unknown',
+    rank = 'unknown',            // Use rank instead of place here
     gf = 0,
     ga = 0,
     goaldiff = 0,
@@ -19,6 +19,7 @@ export async function generateSeasonRecap(teamStats) {
     goalsForPerGame = 0,
     goalsAgainstPerGame = 0,
     winsRankSeason = 'N/A',
+    lossesRankSeason = 'N/A',    // Added losses rank for GA rank
     pointsRankSeason = 'N/A',
     pointsPctRankSeason = 'N/A',
     goalsForRankSeason = 'N/A',
@@ -45,34 +46,29 @@ Manager: ${manager}
 Team: ${team} ${nhlEmoji}
 Record: ${record}
 Current Streak: ${streak}
-Current Place in Standings: ${place}
-Goals For: ${gf} (${goalsForPerGame.toFixed(2)} per game)
-Goals Against: ${ga} (${goalsAgainstPerGame.toFixed(2)} per game)
-Goal Differential: ${goaldiff}
-Shutouts: ${shutouts}
+Current Place in Standings: ${rank}
+Goals For: ${gf}, Goals Against: ${ga}
+Goals For Per Game: ${goalsForPerGame.toFixed(2)} (Rank: ${goalsForRankSeason} | All-Time Rank: ${allTimeGoalsForPerGameRank})
+Goals Against Per Game: ${goalsAgainstPerGame.toFixed(2)} (Rank: ${goalsAgainstRankSeason} | All-Time Rank: ${allTimeGoalsAgainstPerGameRank})
+Goal Differential: ${goaldiff} (Rank: ${goalDiffRankSeason} | All-Time Rank: ${allTimeGoalDiffRank})
+Shutouts: ${shutouts} (All-Time Rank: ${allTimeShutoutsRank})
 Penalty Points This Season: ${penaltyPtsSeason}
 Championships Won: ${championships}
 
 Season Ranks:
-- Wins: ${winsRankSeason}
-- Points: ${pointsRankSeason}
-- Points %: ${pointsPctRankSeason}
-- Goals For: ${goalsForRankSeason}
-- Goals Against: ${goalsAgainstRankSeason}
-- Goal Differential: ${goalDiffRankSeason}
+* Wins: ${winsRankSeason}
+* Points: ${pointsRankSeason}
+* Points %: ${pointsPctRankSeason}
 
 All-Time Ranks:
-- Most Wins: ${allTimeMostWinsRank}
-- Most Losses: ${allTimeMostLossRank}
-- Goals For/Game: ${allTimeGoalsForPerGameRank}
-- Goals Against/Game: ${allTimeGoalsAgainstPerGameRank}
-- Shutouts: ${allTimeShutoutsRank}
-- Points: ${allTimePointsRank}
-- Points %: ${allTimePointsPctRank}
-- Goal Differential: ${allTimeGoalDiffRank}
+* Most Wins: ${allTimeMostWinsRank}
+* Most Losses: ${allTimeMostLossRank}
+* Points: ${allTimePointsRank}
+* Points %: ${allTimePointsPctRank}
+* Goal Differential: ${allTimeGoalDiffRank}
 
-Keep it under 150 words.
-Use a highly sarcastic and dramatic, unfiltered hockey blogger voice that thrives on chaos and chirping.
+Keep it under 200 words.
+Use a dramatic, unfiltered hockey blogger voice that thrives on chaos and chirping.
 Use humor, sarcasm, and spicy commentary.
 `;
 
@@ -101,32 +97,35 @@ Use humor, sarcasm, and spicy commentary.
     const data = await response.json();
     const recapText = data.choices[0].message.content.trim();
 
-    // Plain text stats block (no backticks), placed at the top
     const statsBreakout = `
+Congrats on not quitting, ${manager}.
+
 ${nhlEmoji} ${team}
 Record: ${record}
 Current Streak: ${streak}
-Current Place: ${place}
+Current Place: ${rank}
 
-Goals For: ${gf} (Rank: ${goalsForRankSeason} | All-Time GF/G Rank: ${allTimeGoalsForPerGameRank})
-Goals Against: ${ga} (Rank: ${goalsAgainstRankSeason} | All-Time GA/G Rank: ${allTimeGoalsAgainstPerGameRank})
+Goals For: ${gf} (Rank: ${winsRankSeason} | All-Time Rank: ${goalsForRankSeason})
+Goals Against: ${ga} (Rank: ${lossesRankSeason} | All-Time Rank: ${goalsAgainstRankSeason})
+Goals For Per Game: ${goalsForPerGame.toFixed(2)} (Rank: ${goalsForRankSeason} | All-Time Rank: ${allTimeGoalsForPerGameRank})
+Goals Against Per Game: ${goalsAgainstPerGame.toFixed(2)} (Rank: ${goalsAgainstRankSeason} | All-Time Rank: ${allTimeGoalsAgainstPerGameRank})
 Goal Differential: ${goaldiff} (Rank: ${goalDiffRankSeason} | All-Time Rank: ${allTimeGoalDiffRank})
 Shutouts: ${shutouts} (All-Time Rank: ${allTimeShutoutsRank})
 Penalty Points: ${penaltyPtsSeason}
 
 Season Ranks:
-- Wins: ${winsRankSeason}
-- Points: ${pointsRankSeason}
-- Points %: ${pointsPctRankSeason}
+* Wins: ${winsRankSeason}
+* Points: ${pointsRankSeason}
+* Points %: ${pointsPctRankSeason}
 
 All-Time Ranks:
-- Most Wins: ${allTimeMostWinsRank}
-- Most Losses: ${allTimeMostLossRank}
-- Points: ${allTimePointsRank}
-- Points %: ${allTimePointsPctRank}
+* Most Wins: ${allTimeMostWinsRank}
+* Most Losses: ${allTimeMostLossRank}
+* Points: ${allTimePointsRank}
+* Points %: ${allTimePointsPctRank}
+* Goal Differential: ${allTimeGoalDiffRank}
 `;
 
-    // Return the stats block first, then the funny recap
     return `${statsBreakout}\n${recapText}`;
 
   } catch (error) {
