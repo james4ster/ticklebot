@@ -1,42 +1,80 @@
-import fetch from 'node-fetch';
-import 'dotenv/config';
-
-/**
- * Generates a season recap from team stats using OpenRouter + GPT.
- * @param {Object} teamStats - Team stats input.
- * @param {string} teamStats.manager - Manager name.
- * @param {string} teamStats.teamName - NHL team name.
- * @param {string} teamStats.record - Record in W-L-T format.
- * @param {string} teamStats.streak - Current streak (e.g., 3W, 2L).
- * @param {string} teamStats.rival - Main rival manager name.
- * @param {string} teamStats.biggestWin - Biggest win (e.g., "6–1 vs Rangers").
- * @param {string} teamStats.worstLoss - Worst loss (e.g., "1–7 vs Capitals").
- * @returns {Promise<string>} Recap text
- */
 export async function generateSeasonRecap(teamStats) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  console.log('OPENROUTER_API_KEY:', apiKey ? 'Loaded' : 'Missing');
-
   if (!apiKey) {
-    console.error('❌ OPENROUTER_API_KEY not set in environment variables.');
+    console.error('❌ OPENROUTER_API_KEY not set.');
     return '❌ API key missing.';
   }
 
+  const {
+    manager,
+    team = 'Unknown',
+    record,
+    streak,
+    place = 'unknown',
+    gf = 0,
+    ga = 0,
+    goaldiff = 0,
+    shutouts = 0,
+    penaltyPtsSeason = 0,
+    goalsForPerGame = 0,
+    goalsAgainstPerGame = 0,
+    winsRankSeason = 'N/A',
+    pointsRankSeason = 'N/A',
+    pointsPctRankSeason = 'N/A',
+    goalsForRankSeason = 'N/A',
+    goalsAgainstRankSeason = 'N/A',
+    goalDiffRankSeason = 'N/A',
+    allTimeMostWinsRank = 'N/A',
+    allTimeMostLossRank = 'N/A',
+    allTimeGoalsForPerGameRank = 'N/A',
+    allTimeGoalsAgainstPerGameRank = 'N/A',
+    allTimeShutoutsRank = 'N/A',
+    allTimePointsRank = 'N/A',
+    allTimePointsPctRank = 'N/A',
+    allTimeGoalDiffRank = 'N/A',
+    discordID = '',
+    nhlTeam = '',
+    nhlEmoji = '',
+    championships = 0
+  } = teamStats;
+
   const prompt = `
-  Write a hilarious, and slightly offensive season recap for this NHL '95 team in an online league.
+Write a hilarious, slightly offensive season recap for this NHL '95 team in an online league. Include as many of the following stats and rankings as possible, and feel free to roast the manager:
 
-  Manager: ${teamStats.manager}
-  Team: ${teamStats.teamName}
-  Record: ${teamStats.record}
-  Current Streak: ${teamStats.streak}
-  Current Place in Standings: ${teamStats.place}
+Manager: ${manager}
+Team: ${team} ${nhlEmoji}
+Record: ${record}
+Current Streak: ${streak}
+Current Place in Standings: ${place}
+Goals For: ${gf} (${goalsForPerGame.toFixed(2)} per game)
+Goals Against: ${ga} (${goalsAgainstPerGame.toFixed(2)} per game)
+Goal Differential: ${goaldiff}
+Shutouts: ${shutouts}
+Penalty Points This Season: ${penaltyPtsSeason}
+Championships Won: ${championships}
 
-  Make fun of their embarrassing losses and questionable coaching decisions. This is from the NHL '95 SEGA game, so reference those players and teams.
-  Taunt them for their good plays like a jealous rival fan.
-  Keep it under 150 words.
-  Use the tone of a dramatic, unfiltered hockey blogger who thrives on chaos and chirping.
-  Use humor, sarcasm, and spicy commentary.
-  `;
+Season Ranks:
+- Wins: ${winsRankSeason}
+- Points: ${pointsRankSeason}
+- Points %: ${pointsPctRankSeason}
+- Goals For: ${goalsForRankSeason}
+- Goals Against: ${goalsAgainstRankSeason}
+- Goal Differential: ${goalDiffRankSeason}
+
+All-Time Ranks:
+- Most Wins: ${allTimeMostWinsRank}
+- Most Losses: ${allTimeMostLossRank}
+- Goals For/Game: ${allTimeGoalsForPerGameRank}
+- Goals Against/Game: ${allTimeGoalsAgainstPerGameRank}
+- Shutouts: ${allTimeShutoutsRank}
+- Points: ${allTimePointsRank}
+- Points %: ${allTimePointsPctRank}
+- Goal Differential: ${allTimeGoalDiffRank}
+
+Keep it under 200 words.
+Use a dramatic, unfiltered hockey blogger voice that thrives on chaos and chirping.
+Use humor, sarcasm, and spicy commentary.
+`;
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
