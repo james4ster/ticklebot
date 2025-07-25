@@ -6,15 +6,18 @@ import express from 'express';
 import { handleScheduleCommand } from './schedule.js';
 import { nhlEmojiMap } from './nhlEmojiMap.js';
 import { generateSeasonRecap } from './recap.js'; // <== Added import for recap function
+import { handleGuildMemberAdd } from './welcome.js';  //
 
 // === Discord Bot Setup ===
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,  // Added to support the Welcome message (welcome.js)
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
   ]
 });
+handleGuildMemberAdd(client); //
 
 // === GAS URLs ===
 const reportsUrl = 'https://script.google.com/macros/s/AKfycbxnXDsmWv-Rv7yU7nKeLh6vQ11r62DtevC-m1z3E05Hl0RnVwPQGlpRbntWo84IxfgF/exec?report=reports';
