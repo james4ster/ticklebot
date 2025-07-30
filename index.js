@@ -154,7 +154,11 @@ client.on('messageCreate', async message => {
         ? phraseObj.channel.includes(channelName)
         : phraseObj.channel === channelName);
 
-    const messageHasTrigger = triggers.some(trigger => msg.includes(trigger));
+    // Use regex with word boundaries for safe matching of all triggers
+    const triggerMatches = triggers.some(trigger => {
+      const regex = new RegExp(`\\b${trigger}\\b`, 'i');
+      return regex.test(message.content);
+    });
 
     // Only respond to "OT" or "Overtime" with optional punctuation (e.g. "OT!", "Overtime.")
     const isOnlyOT = triggers.length === 1 && (
@@ -164,7 +168,7 @@ client.on('messageCreate', async message => {
     const msgIsOT = /^ot[\.\!\?]*$/i.test(message.content.trim());
     const msgIsOvertime = /^overtime[\.\!\?]*$/i.test(message.content.trim());
 
-    if (channelMatches && messageHasTrigger) {
+    if (channelMatches && triggerMatches) {
       if (isOnlyOT && !(msgIsOT || msgIsOvertime)) {
         continue; // Skip if not exactly OT or Overtime with optional punctuation
       }
