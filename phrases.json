@@ -6,7 +6,7 @@
   {
     "triggers": ["ot", "overtime"],
     "response": "🐺 Nobody gives a fuck if your game went to overtime",
-    "channel": "pure-scores"
+    "channel": ["pure-scores", "s14-playoff-scores"]
   },
   {
     "triggers": ["this league sucks"],

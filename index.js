@@ -148,14 +148,27 @@ client.on('messageCreate', async message => {
 
   for (const phraseObj of phrases) {
     const triggers = phraseObj.triggers.map(trigger => trigger.toLowerCase());
-    const channelMatches = !phraseObj.channel || phraseObj.channel === channelName;
+    const channelMatches =
+      !phraseObj.channel ||
+      (Array.isArray(phraseObj.channel)
+        ? phraseObj.channel.includes(channelName)
+        : phraseObj.channel === channelName);
+
     const messageHasTrigger = triggers.some(trigger => msg.includes(trigger));
 
-    // Special case: skip "ot"/"overtime" if message contains "ticklebot" or "bot"
-    const isOTTrigger = triggers.includes("ot") || triggers.includes("overtime");
-    const shouldIgnoreOT = isOTTrigger && (msg.includes("ticklebot") || msg.includes("bot"));
+    // Only respond to "OT" or "Overtime" with optional punctuation (e.g. "OT!", "Overtime.")
+    const isOnlyOT = triggers.length === 1 && (
+      triggers[0] === "ot" || triggers[0] === "overtime"
+    );
 
-    if (channelMatches && messageHasTrigger && !shouldIgnoreOT) {
+    const msgIsOT = /^ot[\.\!\?]*$/i.test(message.content.trim());
+    const msgIsOvertime = /^overtime[\.\!\?]*$/i.test(message.content.trim());
+
+    if (channelMatches && messageHasTrigger) {
+      if (isOnlyOT && !(msgIsOT || msgIsOvertime)) {
+        continue; // Skip if not exactly OT or Overtime with optional punctuation
+      }
+
       repliedMessages.add(message.id);
       message.reply(phraseObj.response);
 
@@ -167,10 +180,7 @@ client.on('messageCreate', async message => {
       break;
     }
   }
-
 });
-
-
 
 // === Login to Discord ===
 client.login(process.env.DISCORD_TOKEN);
