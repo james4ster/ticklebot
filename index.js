@@ -143,7 +143,7 @@ client.on('messageCreate', async message => {
     if (repliedTo?.author?.bot) return;
   }
 
-  const msg = message.content.toLowerCase();
+  const msgLower = message.content.toLowerCase();
   const channelName = message.channel?.name; // May be undefined in some contexts
 
   for (const phraseObj of phrases) {
@@ -154,10 +154,10 @@ client.on('messageCreate', async message => {
         ? phraseObj.channel.includes(channelName)
         : phraseObj.channel === channelName);
 
-    // Use regex with word boundaries for safe matching of all triggers
+    // Use regex with word boundaries for safe matching of all triggers, on lowercased message
     const triggerMatches = triggers.some(trigger => {
       const regex = new RegExp(`\\b${trigger}\\b`, 'i');
-      return regex.test(message.content);
+      return regex.test(msgLower);
     });
 
     // Only respond to "OT" or "Overtime" with optional punctuation (e.g. "OT!", "Overtime.")
