@@ -20,7 +20,7 @@ const client = new Client({
 handleGuildMemberAdd(client); //
 
 // === GAS URLs ===
-const reportsUrl = 'https://script.google.com/macros/s/AKfycbxnXDsmWv-Rv7yU7nKeLh6vQ11r62DtevC-m1z3E05Hl0RnVwPQGlpRbntWo84IxfgF/exec?report=reports';
+const reportsUrl = 'https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_VNirLVVhymltp1fMxLHH2XrVnQZbln2Qbhw36fDz6b1I4UqS/exec?report=reports';
 
 // === Bot Online Confirmation ===
 client.once('ready', () => {
