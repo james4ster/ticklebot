@@ -23,6 +23,6 @@ export const nhlEmojiMap = {
   "TBL": "<:NHLLightning:1355926614361505894>",
   "TOR": "<:NHLLeafs:1355926631021281410>",
   "VAN": "<:NHLCanucks:1398023285450604574>",
-  "WSH": "<:NHLCapitals:1398022419171508264>",
+  "WAS": "<:NHLCapitals:1398022419171508264>",
   "WPG": "<:NHLJets:1398021506008879185>"
 };
