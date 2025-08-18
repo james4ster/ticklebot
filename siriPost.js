@@ -7,21 +7,17 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_PURE_SCORES_WEBHOOK;
 // ---- Team mapping ----
 const teamMap = {
   "anaheim": "ANA", "ducks": "ANA",
-  "boston": "BOS", "bruins": "BOS",
-  "bruin": "BOS",
-  "buffalo": "BUF", "sabres": "BUF", 
-  "sabre": "BUF",
+  "boston": "BOS", "bruins": "BOS", "bruin": "BOS",
+  "buffalo": "BUF", "sabres": "BUF", "sabre": "BUF",
   "calgary": "CAL", "flames": "CAL",
   "chicago": "CHI", "blackhawks": "CHI",
   "dallas": "DAL", "stars": "DAL",
   "detroit": "DET", "red wings": "DET",
   "edmonton": "EDM", "oilers": "EDM",
   "florida": "FLA", "panthers": "FLA",
-  "hartford": "HFD", "whalers": "HFD",
-  "whaler": "HFD", "whale": "HFD",
+  "hartford": "HFD", "whalers": "HFD", "whaler": "HFD", "whale": "HFD",
   "los angeles": "LAK", "kings": "LAK",
-  "montreal": "MTL", "canadiens": "MTL",
-  "canadians": "MTL",
+  "montreal": "MTL", "canadiens": "MTL", "canadians": "MTL",
   "new jersey": "NJD", "devils": "NJD",
   "new york islanders": "NYI", "islanders": "NYI", "highlanders": "NYI",
   "new york rangers": "NYR", "rangers": "NYR",
@@ -35,8 +31,7 @@ const teamMap = {
   "toronto": "TOR", "leafs": "TOR",
   "vancouver": "VAN", "canucks": "VAN",
   "washington": "WAS", "capitals": "WAS",
-  "winnipeg": "WPG", "jets": "WPG",
-  "jet's": "WPG"
+  "winnipeg": "WPG", "jets": "WPG", "jet's": "WPG"
 };
 
 // ---- Number mapping ----
@@ -73,7 +68,10 @@ function convertNumberWord(word) {
 // ---- Parse Siri input ----
 export function parseSiriInput(input) {
   input = input.replace(/^!siri\s*/i, "").trim();
+  input = input.replace(/[-–—]/g, " "); // replace any dashes with spaces
+  input = input.replace(/'/g, ""); // remove apostrophes
   const words = input.split(/\s+/);
+
   let teams = [];
   let scores = [];
   let currentTeam = [];
@@ -128,7 +126,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const result = parseSiriInput(input);
       const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
       await postToDiscord(message);
-      console.log("Posted:", message);
+      console.log("Your score was posted nerd!");
     } catch (err) {
       console.error("Error:", err.message);
     }
