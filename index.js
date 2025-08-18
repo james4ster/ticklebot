@@ -116,6 +116,45 @@ app.post('/api/generate-recap', async (req, res) => {
   }
 });
 
+
+// === Siri Score Endpoint ===
+// This endpoint will receive a score from Siri and post it to Discord
+
+import { parseSiriInput, postToDiscord } from './siriPost.js';
+
+app.post('/api/siri-score', async (req, res) => {
+  try {
+    const { text } = req.body; // text comes from the Siri Shortcut
+    if (!text) throw new Error("No text provided");
+
+    const result = parseSiriInput(text);
+
+    // Check if parsing was successful
+    if (!result || !result.homeTeam || !result.awayTeam) {
+      return res.json({
+        success: false,
+        message: "Say it correctly fuck nuts"
+      });
+    }
+
+    const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
+    await postToDiscord(message);
+
+    // Send back the formatted message
+    res.json({ success: true, message });
+
+  } catch (err) {
+    console.error('❌ Siri input error:', err);
+    res.json({
+      success: false,
+      message: "Error processing input. Make sure you said a valid score.  Are you high?"
+    });
+  }
+});
+
+
+
+
 // Health check endpoint
 app.get('/', (req, res) => {
   res.send('🟢 TickleBot is alive and ready to serve!');
