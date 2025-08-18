@@ -2,7 +2,7 @@
 import fetch from "node-fetch";
 
 // ---- Discord webhook ----
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_TICKLE_TESTING_WEBHOOK;
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_PURE_SCORES_WEBHOOK;
 
 // ---- Team mapping ----
 const teamMap = {

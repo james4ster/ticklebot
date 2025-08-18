@@ -131,8 +131,7 @@ app.post('/api/siri-score', async (req, res) => {
 
     // Custom success message
     res.json({
-      success: true,
-      message: "Your score was posted nerd"
+       message: "Your score was posted nerd"
     });
 
   } catch (err) {
