@@ -125,11 +125,16 @@ app.post('/api/siri-score', async (req, res) => {
     if (!text) throw new Error("No text provided");
 
     const result = parseSiriInput(text);
-
     const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
+
     await postToDiscord(message);
 
-    res.json({ success: true, message });
+    // Custom success message
+    res.json({
+      success: true,
+      message: "Your score was posted nerd"
+    });
+
   } catch (err) {
     console.error('❌ Siri input error:', err);
     res.json({
@@ -138,6 +143,7 @@ app.post('/api/siri-score', async (req, res) => {
     });
   }
 });
+
 
 // Health check endpoint
 app.get('/', (req, res) => {
