@@ -2,11 +2,13 @@
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import express from 'express';
+import fs from 'fs';
 
 import { handleScheduleCommand } from './schedule.js';
 import { nhlEmojiMap } from './nhlEmojiMap.js';
 import { generateSeasonRecap } from './recap.js'; // <== Added import for recap function
 import { handleGuildMemberAdd } from './welcome.js';  //
+import { parseSiriInput, postToDiscord } from './siriPost.js'; // <== Moved here
 
 // === Discord Bot Setup ===
 const client = new Client({
@@ -116,13 +118,7 @@ app.post('/api/generate-recap', async (req, res) => {
   }
 });
 
-
 // === Siri Score Endpoint ===
-// This endpoint will receive a score from Siri and post it to Discord
-
-import { parseSiriInput, postToDiscord } from './siriPost.js';
-
-
 app.post('/api/siri-score', async (req, res) => {
   try {
     const { text } = req.body; // text comes from the Siri Shortcut
@@ -130,31 +126,18 @@ app.post('/api/siri-score', async (req, res) => {
 
     const result = parseSiriInput(text);
 
-    // Check if parsing was successful
-    if (!result || !result.homeTeam || !result.awayTeam) {
-      return res.json({
-        success: false,
-        message: "Say it correctly fuck nuts"
-      });
-    }
-
     const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
     await postToDiscord(message);
 
-    // Send back the formatted message
     res.json({ success: true, message });
-
   } catch (err) {
     console.error('❌ Siri input error:', err);
     res.json({
       success: false,
-      message: "Error processing input. Make sure you said a valid score.  Are you high?"
+      message: "Error processing input. Make sure you said a valid score. Are you high?"
     });
   }
 });
-
-
-
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -167,24 +150,20 @@ app.listen(PORT, () => {
 });
 
 // === Dynamic Message Listener Using phrases.json ===
-import fs from 'fs';
 const phrases = JSON.parse(fs.readFileSync('./phrases.json', 'utf-8'));
-
 const repliedMessages = new Set();
 
 client.on('messageCreate', async message => {
-  // Added webhookId check here as requested
   if (message.author.bot || message.webhookId) return;
   if (repliedMessages.has(message.id)) return;
 
-  // Optional: prevent responding to replies that mention a bot
   if (message.reference) {
     const repliedTo = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
     if (repliedTo?.author?.bot) return;
   }
 
   const msgLower = message.content.toLowerCase();
-  const channelName = message.channel?.name; // May be undefined in some contexts
+  const channelName = message.channel?.name;
 
   for (const phraseObj of phrases) {
     const triggers = phraseObj.triggers.map(trigger => trigger.toLowerCase());
@@ -194,13 +173,11 @@ client.on('messageCreate', async message => {
         ? phraseObj.channel.includes(channelName)
         : phraseObj.channel === channelName);
 
-    // Use regex with word boundaries for safe matching of all triggers, on lowercased message
     const triggerMatches = triggers.some(trigger => {
       const regex = new RegExp(`\\b${trigger}\\b`, 'i');
       return regex.test(msgLower);
     });
 
-    // Only respond to "OT" or "Overtime" with optional punctuation (e.g. "OT!", "Overtime.")
     const isOnlyOT = triggers.length === 1 && (
       triggers[0] === "ot" || triggers[0] === "overtime"
     );
@@ -209,14 +186,11 @@ client.on('messageCreate', async message => {
     const msgIsOvertime = /^overtime[\.\!\?]*$/i.test(message.content.trim());
 
     if (channelMatches && triggerMatches) {
-      if (isOnlyOT && !(msgIsOT || msgIsOvertime)) {
-        continue; // Skip if not exactly OT or Overtime with optional punctuation
-      }
+      if (isOnlyOT && !(msgIsOT || msgIsOvertime)) continue;
 
       repliedMessages.add(message.id);
       message.reply(phraseObj.response);
 
-      // Clear memory after 10 minutes
       setTimeout(() => {
         repliedMessages.delete(message.id);
       }, 10 * 60 * 1000);
