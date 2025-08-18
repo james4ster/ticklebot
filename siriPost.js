@@ -1,4 +1,6 @@
 // siriPost.js
+// This script handles parsing Siri input and posting scores to Discord (pure-scores channel)
+
 import fetch from "node-fetch";
 
 // ---- Discord webhook ----
