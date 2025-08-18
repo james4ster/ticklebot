@@ -8,7 +8,9 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_PURE_SCORES_WEBHOOK;
 const teamMap = {
   "anaheim": "ANA", "ducks": "ANA",
   "boston": "BOS", "bruins": "BOS",
-  "buffalo": "BUF", "sabres": "BUF",
+  "bruin": "BOS",
+  "buffalo": "BUF", "sabres": "BUF", 
+  "sabre": "BUF",
   "calgary": "CAL", "flames": "CAL",
   "chicago": "CHI", "blackhawks": "CHI",
   "dallas": "DAL", "stars": "DAL",
@@ -16,10 +18,12 @@ const teamMap = {
   "edmonton": "EDM", "oilers": "EDM",
   "florida": "FLA", "panthers": "FLA",
   "hartford": "HFD", "whalers": "HFD",
+  "whaler": "HFD", "whale": "HFD",
   "los angeles": "LAK", "kings": "LAK",
   "montreal": "MTL", "canadiens": "MTL",
+  "canadians": "MTL",
   "new jersey": "NJD", "devils": "NJD",
-  "new york islanders": "NYI", "islanders": "NYI",
+  "new york islanders": "NYI", "islanders": "NYI", "highlanders": "NYI",
   "new york rangers": "NYR", "rangers": "NYR",
   "ottawa": "OTT", "senators": "OTT",
   "philadelphia": "PHL", "flyers": "PHL",
@@ -31,7 +35,8 @@ const teamMap = {
   "toronto": "TOR", "leafs": "TOR",
   "vancouver": "VAN", "canucks": "VAN",
   "washington": "WAS", "capitals": "WAS",
-  "winnipeg": "WPG", "jets": "WPG"
+  "winnipeg": "WPG", "jets": "WPG",
+  "jet's": "WPG"
 };
 
 // ---- Number mapping ----
