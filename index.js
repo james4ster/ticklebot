@@ -204,31 +204,6 @@ client.on('messageCreate', async message => {
   }
 });
 
-// === Blowout GIF Listener ===
-const SCORE_CHANNEL_ID = process.env.DISCORD_PURE_SCORES_CHANNEL_ID; // PURE_SCORES channel ID
-
-client.on('messageUpdate', async (oldMessage, newMessage) => {
-  if (newMessage.channel.id !== SCORE_CHANNEL_ID) return;
-  if (newMessage.author.bot) return;
-
-  // Wait until the other bot has marked it as processed
-  if (!newMessage.content.includes('✅')) return; // adjust if your checkmark is different
-
-  // Parse the score from the message (example: "Away 2 - Home 8")
-  const match = newMessage.content.match(/(\d+)\s*-\s*(\d+)/);
-  if (!match) return;
-
-  const homeScore = parseInt(match[1], 10);
-  const awayScore = parseInt(match[2], 10);
-  const diff = Math.abs(homeScore - awayScore);
-
-  if (diff >= 6) {
-    await newMessage.channel.send({
-      content: `You got beaded son....`,
-      files: ['https://media.tenor.com/mFsCW7WVVD4AAAAM/paging-mr-morrow-mardi-gras.gif']
-    });
-  }
-});
 
 // === Login to Discord ===
 client.login(process.env.DISCORD_TOKEN);
