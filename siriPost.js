@@ -66,7 +66,7 @@ function convertNumberWord(word) {
 }
 
 // ---- Parse Siri input ----
-function parseSiriInput(input) {
+export function parseSiriInput(input) {
   input = input.replace(/^!siri\s*/i, "").trim();
   const words = input.split(/\s+/);
   let teams = [];
@@ -101,7 +101,7 @@ function parseSiriInput(input) {
 }
 
 // ---- Post to Discord ----
-async function postToDiscord(content) {
+export async function postToDiscord(content) {
   const res = await fetch(DISCORD_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -110,20 +110,22 @@ async function postToDiscord(content) {
   if (!res.ok) throw new Error(`Discord post failed: ${res.statusText}`);
 }
 
-// ---- Main ----
-(async () => {
-  const input = process.argv.slice(2).join(" ");
-  if (!input) {
-    console.error("No input provided. Usage: node siriPost.js \"<team> <score> <team> <score>\"");
-    process.exit(1);
-  }
+// ---- Optional: Standalone CLI Test ----
+if (import.meta.url === `file://${process.argv[1]}`) {
+  (async () => {
+    const input = process.argv.slice(2).join(" ");
+    if (!input) {
+      console.error("No input provided. Usage: node siriPost.js \"<team> <score> <team> <score>\"");
+      process.exit(1);
+    }
 
-  try {
-    const result = parseSiriInput(input);
-    const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
-    await postToDiscord(message);
-    console.log("Posted:", message);
-  } catch (err) {
-    console.error("Error:", err.message);
-  }
-})();
+    try {
+      const result = parseSiriInput(input);
+      const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
+      await postToDiscord(message);
+      console.log("Posted:", message);
+    } catch (err) {
+      console.error("Error:", err.message);
+    }
+  })();
+}

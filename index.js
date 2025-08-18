@@ -122,6 +122,7 @@ app.post('/api/generate-recap', async (req, res) => {
 
 import { parseSiriInput, postToDiscord } from './siriPost.js';
 
+
 app.post('/api/siri-score', async (req, res) => {
   try {
     const { text } = req.body; // text comes from the Siri Shortcut
