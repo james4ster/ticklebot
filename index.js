@@ -1,14 +1,26 @@
 // === Imports ===
+
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import express from 'express';
 import fs from 'fs';
 
+// Bot functionality
 import { handleScheduleCommand } from './schedule.js';
 import { nhlEmojiMap } from './nhlEmojiMap.js';
-import { generateSeasonRecap } from './recap.js'; // <== Added import for recap function
-import { handleGuildMemberAdd } from './welcome.js';  //
-import { parseSiriInput, postToDiscord } from './siriPost.js'; // <== Moved here
+import { generateSeasonRecap } from './recap.js';
+import { handleGuildMemberAdd } from './welcome.js';
+import { parseSiriInput, postToDiscord } from './siriPost.js';
+
+// === Imports for ELO Charting ===
+import { getSheetData } from './nhl95-elo-chart/fetchELO.js';
+import { flattenEloHistory } from './nhl95-elo-chart/processELO.js';
+import { buildDatasets } from './nhl95-elo-chart/datasets.js';
+import { renderChart } from './nhl95-elo-chart/renderChart.js';
+
+// === QuickChart ===
+import QuickChart from 'quickchart-js';
+
 
 // === Discord Bot Setup ===
 const client = new Client({
@@ -73,6 +85,33 @@ client.on('interactionCreate', async interaction => {
   if (interaction.commandName === 'schedule') {
     return handleScheduleCommand(interaction);
   }
+
+  if (interaction.commandName === 'myelo') {
+    await interaction.reply({ content: '📈 Generating your ELO chart...', ephemeral: true });
+
+    try {
+      const chartUrl = await generateManagerEloChartQC(interaction.user.id);
+
+      if (!chartUrl) {
+        return interaction.editReply('❌ No ELO data found for you.');
+      }
+
+      await interaction.channel.send({
+        embeds: [
+          {
+            title: `${interaction.user.username}'s ELO History`,
+            image: { url: chartUrl },
+            color: 0xff0000
+          }
+        ]
+      });
+
+      await interaction.editReply({ content: '✅ Done!', ephemeral: true });
+    } catch (err) {
+      console.error('❌ Error generating /myelo chart:', err);
+      await interaction.editReply('❌ Failed to generate your ELO chart.');
+    }
+  }
 });
 
 // === Slash Command Registration (Run once or on updates) ===
@@ -88,7 +127,10 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
         .setDescription('Ask Ed to run some reports'),
       new SlashCommandBuilder()
         .setName('schedule')
-        .setDescription('Ask Ed to show your schedule')
+        .setDescription('Ask Ed to show your schedule'),
+      new SlashCommandBuilder()
+        .setName('myelo')
+        .setDescription('Ask Ed to show ELO history')
     ].map(cmd => cmd.toJSON());
 
     await rest.put(
@@ -203,6 +245,98 @@ client.on('messageCreate', async message => {
     }
   }
 });
+
+
+// === ELO Chart Functions ===
+// === ELO Chart Functions (QuickChart, bucketed) ===
+export async function generateManagerEloChartQC(managerDiscordId) {
+  try {
+    const eloRows = await getSheetData('ELOHistory!A:P');
+    const adamRows = await getSheetData('AdamSetup!B12:D');
+    const flatElo = flattenEloHistory(eloRows, adamRows);
+
+    const managerElo = flatElo.filter(row => row.discordId === managerDiscordId);
+    if (!managerElo.length) {
+      console.log(`No ELO data for ${managerDiscordId}`);
+      return;
+    }
+
+    const bucketSize = 15;
+    const bucketedData = [];
+    for (let i = 0; i < managerElo.length; i += bucketSize) {
+      const chunk = managerElo.slice(i, i + bucketSize);
+      if (chunk.length > 0) {
+        const avgElo = chunk.reduce((sum, r) => sum + r.elo, 0) / chunk.length;
+        bucketedData.push({ x: i + chunk.length, y: avgElo });
+      }
+    }
+
+    const datasets = [
+      {
+        label: managerElo[0].manager,
+          data: bucketedData,
+          borderColor: "red",          // line color
+          backgroundColor: "blue",     // default fill color (optional)
+          pointBorderColor: "blue",    // outline of the points
+          pointBackgroundColor: "blue",// fill color of the points
+          pointRadius: 5,
+          showLine: true
+      },
+    ];
+
+    const chartConfig = {
+      type: 'line',
+      data: { datasets },
+      options: {
+        plugins: {
+          legend: { display: true, position: 'right' },
+          title: {
+            display: true,
+            text: 'Manager ELO History (bucketed - 15 Games)',
+            font: { size: 20 },
+          },
+          datalabels: { // this enables labels above points
+            display: true,
+            align: 'top',
+            formatter: (value) => Math.round(value.y),
+            font: { weight: 'bold', size: 12 },
+            color: 'black',
+          },
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            title: { display: true, text: 'Games' },
+            ticks: { stepSize: bucketSize },
+          },
+          y: {
+            title: { display: true, text: 'ELO' },
+          },
+        },
+      },
+    };
+
+    const qc = new QuickChart();
+    qc.setConfig(chartConfig)
+      .setWidth(1400)
+      .setHeight(700)
+      .setVersion('4'); // Chart.js v4
+
+    const chartUrl = qc.getUrl();
+
+    console.log(`📈 Manager ELO chart URL: ${chartUrl}`);
+    return chartUrl;
+
+  } catch (err) {
+    console.error('❌ Error generating manager ELO chart (QuickChart):', err);
+  }
+}
+
+
+// Example usage:
+generateManagerEloChartQC('582240735793774618');
+
+
 
 
 // === Login to Discord ===
