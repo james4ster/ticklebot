@@ -130,4 +130,4 @@ dist
 .pnp.*
 
 # Replit debugger
-.breakpoints
+.breakpointspnpl_service_account.json
