@@ -334,7 +334,7 @@ export async function generateManagerEloChartQC(managerDiscordId) {
 
 
 // Example usage:
-generateManagerEloChartQC('582240735793774618');
+//generateManagerEloChartQC('582240735793774618');
 
 
 
