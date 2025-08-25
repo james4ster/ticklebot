@@ -203,12 +203,21 @@ client.on('messageCreate', async message => {
   if (message.author.bot || message.webhookId) return;
   if (repliedMessages.has(message.id)) return;
 
+  // ✅ Reply if someone @mentions the bot
+  const msgLower = message.content.toLowerCase();
+  if (message.mentions.has(client.user) || msgLower.includes('ticklebot')) {
+    repliedMessages.add(message.id);
+    await message.reply("🐺 What do you want? I'm busy watching Nyad.");
+    setTimeout(() => repliedMessages.delete(message.id), 10 * 60 * 1000);
+    return;
+  }
+
   if (message.reference) {
     const repliedTo = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
     if (repliedTo?.author?.bot) return;
   }
 
-  const msgLower = message.content.toLowerCase();
+  //const msgLower = message.content.toLowerCase();
   const channelName = message.channel?.name;
 
   for (const phraseObj of phrases) {
