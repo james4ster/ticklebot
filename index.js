@@ -1,3 +1,6 @@
+
+console.log('Running Node version:', process.version);
+
 // === Imports ===
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
