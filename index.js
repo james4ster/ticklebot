@@ -1,4 +1,8 @@
-// === Imports ===
+// === DEBUG ENV & Token Check ===
+console.log('--- DEBUG ENV ---');
+console.log('DISCORD_TOKEN length:', process.env.DISCORD_TOKEN?.length);
+console.log('CLIENT_ID length:', process.env.CLIENT_ID?.length);
+console.log('--- END DEBUG ENV ---');
 
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
@@ -21,16 +25,16 @@ import { renderChart } from './nhl95-elo-chart/renderChart.js';
 // === QuickChart ===
 import QuickChart from 'quickchart-js';
 
-
 // === Discord Bot Setup ===
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,  // Welcome message support
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
   ]
 });
+
 handleGuildMemberAdd(client); // attach welcome handler
 
 // Only one ready listener
@@ -41,8 +45,10 @@ client.once('ready', () => {
 // === Login to Discord ===
 client.login(process.env.DISCORD_TOKEN)
   .then(() => console.log('🚀 Login successful'))
-  .catch(err => console.error('❌ Login failed:', err));
-
+  .catch(err => {
+    console.error('❌ Login failed:', err);
+    console.error('Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+  });
 
 // === GAS URLs ===
 const reportsUrl = 'https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_VNirLVVhymltp1fMxLHH2XrVnQZbln2Qbhw36fDz6b1I4UqS/exec?report=reports';
