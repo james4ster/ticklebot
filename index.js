@@ -145,9 +145,15 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 // === Discord Login ===
 console.log('DISCORD_TOKEN length:', process.env.DISCORD_TOKEN?.length);
 
-client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-});
+(async () => {
+  try {
+    console.log('Attempted Discord login...'); // ✅ Added log
+    await client.login(process.env.DISCORD_TOKEN);
+    console.log(`✅ Logged in as ${client.user.tag}`);
+  } catch (err) {
+    console.error('❌ Discord login failed:', err);
+  }
+})();
 
 // Use a .catch to capture login errors
 client.login(process.env.DISCORD_TOKEN)
