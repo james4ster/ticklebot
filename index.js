@@ -349,4 +349,12 @@ export async function generateManagerEloChartQC(managerDiscordId) {
 
 
 // === Login to Discord ===
-client.login(process.env.DISCORD_TOKEN);
+(async () => {
+  try {
+    await client.login(process.env.DISCORD_TOKEN);
+    console.log(`✅ Logged in as ${client.user.tag}`);
+  } catch (err) {
+    console.error('❌ Discord login failed:', err);
+  }
+})();
+
