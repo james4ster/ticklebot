@@ -43,12 +43,9 @@ client.once('ready', () => {
 });
 
 // === Login to Discord ===
-client.login(process.env.DISCORD_TOKEN)
+client.login(process.env.DISCORD_TOKEN?.trim())
   .then(() => console.log('🚀 Login successful'))
-  .catch(err => {
-    console.error('❌ Login failed:', err);
-    console.error('Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
-  });
+  .catch(err => console.error('❌ Login failed:', err));
 
 // === GAS URLs ===
 const reportsUrl = 'https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_VNirLVVhymltp1fMxLHH2XrVnQZbln2Qbhw36fDz6b1I4UqS/exec?report=reports';
