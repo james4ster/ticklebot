@@ -1,5 +1,5 @@
 // === Imports ===
-
+console.log("🚀 Starting bot...");
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import express from 'express';
@@ -20,6 +20,10 @@ import { renderChart } from './nhl95-elo-chart/renderChart.js';
 
 // === QuickChart ===
 import QuickChart from 'quickchart-js';
+
+// === Import for Wheel Spinning ===
+import { spinWheel, draftState, getTeams } from './spinWheel.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 
 
 // === Discord Bot Setup ===
@@ -45,6 +49,122 @@ client.once('ready', () => {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
+
+  // Spin the Wheel via /spinwheel
+  if (interaction.commandName === 'spinwheel') {
+    try {
+      // 1️⃣ Pull teams from Google Sheets
+      const teams = await getTeams(process.env.SPREADSHEET_ID, 'LogoMaster');
+
+      draftState.remainingTeams = draftState.remainingTeams.length
+        ? draftState.remainingTeams
+        : teams;
+
+      const coachId = interaction.user.id;
+      if (!draftState.coachStatus[coachId]) {
+        draftState.coachStatus[coachId] = { usedRespin: false, pendingPick: null };
+      }
+
+      // 2️⃣ Spin the wheel
+      const { winner, wheelUrl } = await spinWheel(
+        draftState.remainingTeams.map(t => t.name),
+        process.env.WHEEL_API_KEY
+      );
+
+      const winnerObj = draftState.remainingTeams.find(t => t.name === winner);
+
+      // 3️⃣ Handle first spin (allow respin)
+      if (!draftState.coachStatus[coachId].usedRespin) {
+        draftState.coachStatus[coachId].pendingPick = winnerObj;
+
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('respin_yes')
+            .setLabel('Respin')
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId('respin_no')
+            .setLabel('Keep')
+            .setStyle(ButtonStyle.Secondary)
+        );
+
+        await interaction.reply({
+          content: `🎡 The wheel landed on **${winnerObj.name}**! You have 1 respin. Do you want to spin again?\n[See the wheel](${wheelUrl})`,
+          components: [row],
+          embeds: [{ image: { url: winnerObj.logo } }],
+          ephemeral: true
+        });
+
+      } else {
+        // Already used respin → final pick
+        draftState.remainingTeams = draftState.remainingTeams.filter(t => t.name !== winnerObj.name);
+
+        await interaction.reply({
+          content: `🎡 The wheel landed on **${winnerObj.name}**! This pick is final.\n[See the wheel](${wheelUrl})`,
+          embeds: [{ image: { url: winnerObj.logo } }]
+        });
+      }
+
+    } catch (err) {
+      console.error('❌ Error running /spinwheel:', err);
+      await interaction.reply({ content: '❌ Something went wrong with the wheel.', ephemeral: true });
+    }
+  }
+
+
+  // === Button Handler for SpinWheel Respin ===
+  if (interaction.isButton()) {
+    const coachId = interaction.user.id;
+    const status = draftState.coachStatus[coachId];
+
+    // Only handle if there’s a pending pick
+    if (!status || !status.pendingPick) return;
+
+    if (interaction.customId === 'respin_yes') {
+      // Mark respin as used
+      status.usedRespin = true;
+
+      // Spin again
+      const { winner, wheelUrl } = await spinWheel(
+        draftState.remainingTeams.map(t => t.name),
+        process.env.WHEEL_API_KEY
+      );
+
+      const winnerObj = draftState.remainingTeams.find(t => t.name === winner);
+      status.pendingPick = winnerObj; // update pending pick
+
+      // Update original message with new wheel
+      await interaction.update({
+        content: `🎡 Respin result: **${winnerObj.name}**!\nYou must take this pick.\n[See the wheel](${wheelUrl})`,
+        components: [],
+        embeds: [{ image: { url: winnerObj.logo } }]
+      });
+
+      // Remove from remaining teams
+      draftState.remainingTeams = draftState.remainingTeams.filter(t => t.name !== winnerObj.name);
+
+      // Clear pending pick
+      status.pendingPick = null;
+
+    } else if (interaction.customId === 'respin_no') {
+      // Coach chooses to keep the original pick
+      const winnerObj = status.pendingPick;
+
+      await interaction.update({
+        content: `🎡 You kept **${winnerObj.name}**! Pick is final.`,
+        components: [],
+        embeds: [{ image: { url: winnerObj.logo } }]
+      });
+
+      // Remove from remaining teams
+      draftState.remainingTeams = draftState.remainingTeams.filter(t => t.name !== winnerObj.name);
+
+      // Clear pending pick
+      status.pendingPick = null;
+    }
+  }
+
+  // Generate Reports via /commands
   if (interaction.commandName === 'reports') {
     await interaction.reply({ content: '📡 Ed is getting your reports...', ephemeral: true });
 
@@ -86,6 +206,8 @@ client.on('interactionCreate', async interaction => {
     return handleScheduleCommand(interaction);
   }
 
+
+  // Generate ELO Chart via /myelo
   if (interaction.commandName === 'myelo') {
     await interaction.reply({ content: '📈 Generating your ELO chart...', ephemeral: true });
 
@@ -130,7 +252,10 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
         .setDescription('Ask Ed to show your schedule'),
       new SlashCommandBuilder()
         .setName('myelo')
-        .setDescription('Ask Ed to show ELO history')
+        .setDescription('Ask Ed to show ELO history'),
+      new SlashCommandBuilder()   
+        .setName('spinwheel')
+        .setDescription('Spin the draft wheel to pick a team')
     ].map(cmd => cmd.toJSON());
 
     await rest.put(
@@ -346,7 +471,7 @@ export async function generateManagerEloChartQC(managerDiscordId) {
 //generateManagerEloChartQC('582240735793774618');
 
 
-
-
 // === Login to Discord ===
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN)
+.then(() => console.log("✅ Login initiated"))
+.catch(err => console.error("❌ Login failed", err));
