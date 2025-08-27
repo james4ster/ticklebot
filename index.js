@@ -144,6 +144,18 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Express server running on port ${PORT}`));
 
 // === Discord Login ===
+client.on('error', (err) => {
+  console.error('❌ Client error:', err);
+});
+
+client.on('shardError', (err) => {
+  console.error('❌ Shard error:', err);
+});
+
+client.on('shardDisconnect', (event, id) => {
+  console.warn(`⚠️ Shard ${id} disconnected:`, event);
+});
+
 console.log('Attempted Discord login...');
 (async () => {
   try {
