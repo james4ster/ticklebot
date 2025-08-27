@@ -1,14 +1,14 @@
-{
-  "name": "ticklebot",
-  "version": "1.0.0",
-  "description": "Discord bot for /reports",
-  "type": "module",
-  "main": "index.js",
+  {
+    "name": "ticklebot",
+    "version": "1.0.0",
+    "description": "Discord bot for /reports",
+    "type": "module",
+    "main": "index.js",
     "scripts": {
-      "start": "node index.js",   
+      "start": "node index.js",
       "start-test": "node testbot.js",
       "test": "echo \"Error: no test specified\" && exit 1"
-    }
+    },
   },
   "keywords": [],
   "author": "",
