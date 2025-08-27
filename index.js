@@ -26,20 +26,27 @@ import QuickChart from 'quickchart-js';
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,  // Added to support the Welcome message (welcome.js)
+    GatewayIntentBits.GuildMembers,  // Welcome message support
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
   ]
 });
-handleGuildMemberAdd(client); //
+handleGuildMemberAdd(client); // attach welcome handler
+
+// Only one ready listener
+client.once('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
+});
+
+// === Login to Discord ===
+client.login(process.env.DISCORD_TOKEN)
+  .then(() => console.log('🚀 Login successful'))
+  .catch(err => console.error('❌ Login failed:', err));
+
 
 // === GAS URLs ===
 const reportsUrl = 'https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_VNirLVVhymltp1fMxLHH2XrVnQZbln2Qbhw36fDz6b1I4UqS/exec?report=reports';
 
-// === Bot Online Confirmation ===
-client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-});
 
 // === Slash Command Handler ===
 client.on('interactionCreate', async interaction => {
