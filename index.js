@@ -1,7 +1,6 @@
 // === Imports ===
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
-import express from 'express';
 import fs from 'fs';
 
 // Bot functionality
@@ -10,13 +9,6 @@ import { nhlEmojiMap } from './nhlEmojiMap.js';
 import { generateSeasonRecap } from './recap.js';
 import { handleGuildMemberAdd } from './welcome.js';
 import { parseSiriInput, postToDiscord } from './siriPost.js';
-
-// === Imports for ELO Charting (disabled for now) ===
-// import { getSheetData } from './nhl95-elo-chart/fetchELO.js';
-// import { flattenEloHistory } from './nhl95-elo-chart/processELO.js';
-// import { buildDatasets } from './nhl95-elo-chart/datasets.js';
-// import { renderChart } from './nhl95-elo-chart/renderChart.js';
-// import QuickChart from 'quickchart-js';
 
 // === Discord Bot Setup ===
 const client = new Client({
@@ -27,64 +19,14 @@ const client = new Client({
     GatewayIntentBits.MessageContent
   ]
 });
-
-// Optional welcome message
-handleGuildMemberAdd(client);
+handleGuildMemberAdd(client); // optional
 
 // === GAS URLs ===
 const reportsUrl = 'https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_VNirLVVhymltp1fMxLHH2XrVnQZbln2Qbhw36fDz6b1I4UqS/exec?report=reports';
 
-// === Express Server ===
-const app = express();
-app.use(express.json());
-
-// Health check endpoint
-app.get('/', (req, res) => res.send('🟢 TickleBot is alive and ready to serve!'));
-
-// Siri Score Endpoint
-app.post('/api/siri-score', async (req, res) => {
-  try {
-    const { text } = req.body;
-    if (!text) throw new Error("No text provided");
-
-    const result = parseSiriInput(text);
-    const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
-    await postToDiscord(message);
-
-    res.json({ message: "Your score was posted nerd" });
-  } catch (err) {
-    console.error('❌ Siri input error:', err);
-    res.json({ success: false, message: "Error processing input. Make sure you said a valid score." });
-  }
-});
-
-// Generate recap endpoint
-app.post('/api/generate-recap', async (req, res) => {
-  try {
-    const teamStats = req.body;
-    const recap = await generateSeasonRecap(teamStats);
-    res.send(recap);
-  } catch (err) {
-    console.error('Error generating recap:', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-// === Discord Message Listener ===
-const phrases = JSON.parse(fs.readFileSync('./phrases.json', 'utf-8'));
-const repliedMessages = new Set();
-
-client.on('messageCreate', async message => {
-  if (message.author.bot || message.webhookId) return;
-  if (repliedMessages.has(message.id)) return;
-
-  const msgLower = message.content.toLowerCase();
-  if (message.mentions.has(client.user) || msgLower.includes('ticklebot')) {
-    repliedMessages.add(message.id);
-    await message.reply("🐺 What do you want? I'm busy watching Nyad.");
-    setTimeout(() => repliedMessages.delete(message.id), 10 * 60 * 1000);
-    return;
-  }
+// === Discord Bot Ready Handler ===
+client.once('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
 // === Slash Command Handler ===
@@ -117,15 +59,14 @@ client.on('interactionCreate', async interaction => {
     return handleScheduleCommand(interaction);
   }
 
-  // Disabled /myelo for now
+  // /myelo disabled for now
   // if (interaction.commandName === 'myelo') {
-  //   await interaction.reply({ content: '📈 /myelo disabled for now', ephemeral: true });
+  //   await interaction.reply({ content: '❌ /myelo disabled', ephemeral: true });
   // }
 });
 
 // === Slash Command Registration ===
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-
 (async () => {
   try {
     console.log('🚀 Registering slash commands...');
@@ -142,24 +83,70 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
   }
 })();
 
-// === Discord Login ===
-console.log('DISCORD_TOKEN length:', process.env.DISCORD_TOKEN?.length);
+// === Discord Message Listener ===
+const phrases = JSON.parse(fs.readFileSync('./phrases.json', 'utf-8'));
+const repliedMessages = new Set();
 
+client.on('messageCreate', async message => {
+  if (message.author.bot || message.webhookId) return;
+  if (repliedMessages.has(message.id)) return;
+
+  const msgLower = message.content.toLowerCase();
+  if (message.mentions.has(client.user) || msgLower.includes('ticklebot')) {
+    repliedMessages.add(message.id);
+    await message.reply("🐺 What do you want? I'm busy watching Nyad.");
+    setTimeout(() => repliedMessages.delete(message.id), 10 * 60 * 1000);
+    return;
+  }
+});
+
+// === Siri Score Endpoint (still usable for HTTP requests) ===
+import express from 'express';
+const app = express();
+app.use(express.json());
+
+app.post('/api/siri-score', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) throw new Error("No text provided");
+
+    const result = parseSiriInput(text);
+    const message = `${result.awayTeam} ${result.awayScore} - ${result.homeTeam} ${result.homeScore}`;
+    await postToDiscord(message);
+
+    res.json({ message: "Your score was posted nerd" });
+  } catch (err) {
+    console.error('❌ Siri input error:', err);
+    res.json({ success: false, message: "Error processing input. Make sure you said a valid score." });
+  }
+});
+
+// Generate recap endpoint
+app.post('/api/generate-recap', async (req, res) => {
+  try {
+    const teamStats = req.body;
+    const recap = await generateSeasonRecap(teamStats);
+    res.send(recap);
+  } catch (err) {
+    console.error('Error generating recap:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Health check endpoint
+app.get('/', (req, res) => res.send('🟢 TickleBot background worker alive!'));
+
+// Only bind Express port if you want web endpoints
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🌐 Express server running on port ${PORT}`));
+
+// === Discord Login ===
+console.log('Attempted Discord login...');
 (async () => {
   try {
-    console.log('Attempted Discord login...'); // ✅ Added log
     await client.login(process.env.DISCORD_TOKEN);
     console.log(`✅ Logged in as ${client.user.tag}`);
   } catch (err) {
     console.error('❌ Discord login failed:', err);
   }
 })();
-
-// Use a .catch to capture login errors
-client.login(process.env.DISCORD_TOKEN)
-  .then(() => console.log('Attempted Discord login'))
-  .catch(err => console.error('❌ Discord login failed', err));
-
-// === Express Port Binding (Render requires this) ===
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
