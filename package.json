@@ -4,9 +4,11 @@
   "description": "Discord bot for /reports",
   "type": "module",
   "main": "index.js",
-  "scripts": {
-    "start-test": "node testbot.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "scripts": {
+      "start": "node index.js",   
+      "start-test": "node testbot.js",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    }
   },
   "keywords": [],
   "author": "",
