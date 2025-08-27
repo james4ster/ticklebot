@@ -11,12 +11,11 @@ import { generateSeasonRecap } from './recap.js';
 import { handleGuildMemberAdd } from './welcome.js';
 import { parseSiriInput, postToDiscord } from './siriPost.js';
 
-// // === Imports for ELO Charting ===
+// === Imports for ELO Charting (disabled for now) ===
 // import { getSheetData } from './nhl95-elo-chart/fetchELO.js';
 // import { flattenEloHistory } from './nhl95-elo-chart/processELO.js';
 // import { buildDatasets } from './nhl95-elo-chart/datasets.js';
 // import { renderChart } from './nhl95-elo-chart/renderChart.js';
-
 // import QuickChart from 'quickchart-js';
 
 // === Discord Bot Setup ===
@@ -28,70 +27,12 @@ const client = new Client({
     GatewayIntentBits.MessageContent
   ]
 });
-handleGuildMemberAdd(client); // optional
+
+// Optional welcome message
+handleGuildMemberAdd(client);
 
 // === GAS URLs ===
 const reportsUrl = 'https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_VNirLVVhymltp1fMxLHH2XrVnQZbln2Qbhw36fDz6b1I4UqS/exec?report=reports';
-
-// === Bot Online Confirmation ===
-client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-});
-
-// === Slash Command Handler ===
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand()) return;
-
-  if (interaction.commandName === 'reports') {
-    await interaction.reply({ content: '📡 Ed is getting your reports...', ephemeral: true });
-    try {
-      const res = await fetch(reportsUrl);
-      const json = await res.json();
-      if (json.error || !json.data) throw new Error(json.error || 'No data returned');
-      const { ga, gf, shutouts } = json.data;
-
-      await interaction.channel.send({
-        content: `🎤 **Listen... Here are your reports. I love dragons!**`,
-        embeds: [
-          { title: "📊 Goals Against per Game - Min 30 GP", image: { url: ga } },
-          { title: "🚀 Goals For per Game - Min 30 GP", image: { url: gf } },
-          { title: "🧱 All-Time Shutouts", image: { url: shutouts } }
-        ]
-      });
-    } catch (error) {
-      console.error('❌ Error running reports:', error);
-      await interaction.channel.send('❌ I messed up running your reports.');
-    }
-  }
-
-  if (interaction.commandName === 'schedule') {
-    return handleScheduleCommand(interaction);
-  }
-
-  // if (interaction.commandName === 'myelo') {
-  //   await interaction.reply({ content: '📈 Generating your ELO chart...', ephemeral: true });
-  //   // ELO chart code removed for now
-  //   await interaction.editReply({ content: '❌ /myelo disabled for now', ephemeral: true });
-  // }
-});
-
-// === Slash Command Registration ===
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-(async () => {
-  try {
-    console.log('🚀 Registering slash commands...');
-    const commands = [
-      new SlashCommandBuilder().setName('reports').setDescription('Ask Ed to run some reports'),
-      new SlashCommandBuilder().setName('schedule').setDescription('Ask Ed to show your schedule'),
-      // new SlashCommandBuilder().setName('myelo').setDescription('Ask Ed to show ELO history')
-    ].map(cmd => cmd.toJSON());
-
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
-    console.log('✅ Slash commands registered.');
-  } catch (error) {
-    console.error('❌ Error registering commands:', error);
-  }
-})();
 
 // === Express Server ===
 const app = express();
@@ -146,17 +87,73 @@ client.on('messageCreate', async message => {
   }
 });
 
-// === Discord Login ===
-console.log('DISCORD_TOKEN length:', process.env.DISCORD_TOKEN?.length);
+// === Slash Command Handler ===
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
+
+  if (interaction.commandName === 'reports') {
+    await interaction.reply({ content: '📡 Ed is getting your reports...', ephemeral: true });
+    try {
+      const res = await fetch(reportsUrl);
+      const json = await res.json();
+      if (json.error || !json.data) throw new Error(json.error || 'No data returned');
+      const { ga, gf, shutouts } = json.data;
+
+      await interaction.channel.send({
+        content: `🎤 **Listen... Here are your reports. I love dragons!**`,
+        embeds: [
+          { title: "📊 Goals Against per Game - Min 30 GP", image: { url: ga } },
+          { title: "🚀 Goals For per Game - Min 30 GP", image: { url: gf } },
+          { title: "🧱 All-Time Shutouts", image: { url: shutouts } }
+        ]
+      });
+    } catch (error) {
+      console.error('❌ Error running reports:', error);
+      await interaction.channel.send('❌ I messed up running your reports.');
+    }
+  }
+
+  if (interaction.commandName === 'schedule') {
+    return handleScheduleCommand(interaction);
+  }
+
+  // Disabled /myelo for now
+  // if (interaction.commandName === 'myelo') {
+  //   await interaction.reply({ content: '📈 /myelo disabled for now', ephemeral: true });
+  // }
+});
+
+// === Slash Command Registration ===
+const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
 (async () => {
   try {
-    await client.login(process.env.DISCORD_TOKEN);
-    console.log(`✅ Logged in as ${client.user.tag}`);
-  } catch (err) {
-    console.error('❌ Discord login failed:', err);
+    console.log('🚀 Registering slash commands...');
+    const commands = [
+      new SlashCommandBuilder().setName('reports').setDescription('Ask Ed to run some reports'),
+      new SlashCommandBuilder().setName('schedule').setDescription('Ask Ed to show your schedule'),
+      // new SlashCommandBuilder().setName('myelo').setDescription('Ask Ed to show ELO history')
+    ].map(cmd => cmd.toJSON());
+
+    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
+    console.log('✅ Slash commands registered.');
+  } catch (error) {
+    console.error('❌ Error registering commands:', error);
   }
 })();
 
-// === Express Port Binding (required for Render) ===
+// === Discord Login ===
+console.log('DISCORD_TOKEN length:', process.env.DISCORD_TOKEN?.length);
+
+client.once('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
+});
+
+// Use a .catch to capture login errors
+client.login(process.env.DISCORD_TOKEN)
+  .then(() => console.log('Attempted Discord login'))
+  .catch(err => console.error('❌ Discord login failed', err));
+
+// === Express Port Binding (Render requires this) ===
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
