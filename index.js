@@ -354,9 +354,3 @@ export async function generateManagerEloChartQC(managerDiscordId) {
 
 // Example usage:
 //generateManagerEloChartQC('582240735793774618');
-
-
-
-
-// === Login to Discord ===
-client.login(process.env.DISCORD_TOKEN);
