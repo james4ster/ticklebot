@@ -21,6 +21,9 @@ import { renderChart } from './nhl95-elo-chart/renderChart.js';
 // === QuickChart ===
 import QuickChart from 'quickchart-js';
 
+// === Wheel Bot ===
+import { spinWheel } from './wheelBot.js';
+
 
 // === Discord Bot Setup ===
 const client = new Client({
@@ -112,6 +115,19 @@ client.on('interactionCreate', async interaction => {
       await interaction.editReply('❌ Failed to generate your ELO chart.');
     }
   }
+
+  if (interaction.commandName === 'spin') {
+    await interaction.deferReply();
+    try {
+      const logoUrl = await spinWheel();
+      await interaction.editReply({
+        content: '🎉 Wheel stopped! Selected logo:',
+        embeds: [{ image: { url: logoUrl } }]
+      });
+    } catch {
+      await interaction.editReply('❌ Something went wrong spinning the wheel.');
+    }
+  }
 });
 
 // === Slash Command Registration (Run once or on updates) ===
@@ -130,7 +146,10 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
         .setDescription('Ask Ed to show your schedule'),
       new SlashCommandBuilder()
         .setName('myelo')
-        .setDescription('Ask Ed to show ELO history')
+        .setDescription('Ask Ed to show ELO history'),
+      new SlashCommandBuilder()
+        .setName('spin')
+        .setDescription('Spin the wheel!')
     ].map(cmd => cmd.toJSON());
 
     await rest.put(
