@@ -21,9 +21,8 @@ import { renderChart } from './nhl95-elo-chart/renderChart.js';
 // === QuickChart ===
 import QuickChart from 'quickchart-js';
 
-// === Wheel Bot ===
-import { spinWheel } from './wheelBot.js';
-
+// === Import Google Sheets API for /elo ===
+import { google } from 'googleapis';
 
 // === Discord Bot Setup ===
 const client = new Client({
@@ -43,6 +42,33 @@ const reportsUrl = 'https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_V
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
+
+
+// == ELO Rankings ==
+async function getEloRankings() {
+  const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+  const auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+  });
+
+  const sheets = google.sheets({ version: 'v4', auth });
+
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: process.env.SPREADSHEET_ID,
+    range: 'Rankings!A2:AF', // A=manager, AF=ELO
+  });
+
+  const rows = res.data.values || [];
+  return rows
+    .map(row => ({
+      manager: row[0],
+      elo: parseFloat(row[31]) || 0 // AF = index 31
+    }))
+    .sort((a, b) => b.elo - a.elo);
+}
+
+
 
 // === Slash Command Handler ===
 client.on('interactionCreate', async interaction => {
@@ -116,18 +142,43 @@ client.on('interactionCreate', async interaction => {
     }
   }
 
-  if (interaction.commandName === 'spin') {
+  if (interaction.commandName === 'elo') {
     await interaction.deferReply();
+
     try {
-      const logoUrl = await spinWheel();
-      await interaction.editReply({
-        content: '🎉 Wheel stopped! Selected logo:',
-        embeds: [{ image: { url: logoUrl } }]
-      });
-    } catch {
-      await interaction.editReply('❌ Something went wrong spinning the wheel.');
+      const ranking = await getEloRankings();
+      if (!ranking.length) return interaction.editReply('No ELO data found.');
+
+      const formatted = ranking
+        .map((r, i) => `**${i + 1}. ${r.manager}** — ${r.elo.toFixed(0)}`)
+        .join('\n');
+
+      // Handle Discord 2000-char limit
+      const MAX_LENGTH = 2000;
+      if (formatted.length <= MAX_LENGTH) {
+        await interaction.editReply(`📊 **Manager ELO Rankings**\n${formatted}`);
+      } else {
+        const chunks = [];
+        let current = '';
+        for (const line of formatted.split('\n')) {
+          if ((current + line + '\n').length > MAX_LENGTH) {
+            chunks.push(current);
+            current = '';
+          }
+          current += line + '\n';
+        }
+        if (current) chunks.push(current);
+
+        await interaction.editReply(chunks.shift());
+        for (const chunk of chunks) await interaction.followUp(chunk);
+      }
+
+    } catch (err) {
+      console.error('❌ Error fetching ELO rankings:', err);
+      await interaction.editReply('❌ Failed to fetch ELO rankings.');
     }
   }
+
 });
 
 // === Slash Command Registration (Run once or on updates) ===
@@ -148,8 +199,8 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
         .setName('myelo')
         .setDescription('Ask Ed to show ELO history'),
       new SlashCommandBuilder()
-        .setName('spin')
-        .setDescription('Spin the wheel!')
+        .setName('elo')
+        .setDescription('As Ed to show ELO rankings')
     ].map(cmd => cmd.toJSON());
 
     await rest.put(
