@@ -1,7 +1,8 @@
 import { google } from 'googleapis';
 
 // Instead of reading a local JSON file, parse it from an environment variable
-const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+const raw = process.env.GOOGLE_SERVICE_ACCOUNT;
+const serviceAccount = JSON.parse(raw.replace(/\\n/g, '\n'));
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 
