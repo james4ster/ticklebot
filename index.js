@@ -159,7 +159,7 @@ client.on('interactionCreate', async interaction => {
       // Handle Discord 2000-char limit
       const MAX_LENGTH = 2000;
       if (formatted.length <= MAX_LENGTH) {
-        await interaction.editReply(`📊 **Manager ELO Rankings**\n${formatted}`);
+        await interaction.editReply(`📊 **ELO Rankings**\n\n${formatted}`);
       } else {
         const chunks = [];
         let current = '';
