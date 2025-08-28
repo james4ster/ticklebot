@@ -3,8 +3,8 @@ import express from 'express';
 import { Client, GatewayIntentBits } from 'discord.js';
 
 // --- Debug: show token ---
-console.log('DISCORD_TOKEN:', JSON.stringify(process.env.DISCORD_TOKEN));
-console.log('Token length:', process.env.DISCORD_TOKEN?.length);
+console.log('DISCORD_TOKEN2:', JSON.stringify(process.env.DISCORD_TOKEN2));
+console.log('Token length:', process.env.DISCORD_TOKEN2?.length);
 
 // --- Minimal Discord bot ---
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -14,7 +14,7 @@ client.once('ready', () => {
 });
 
 console.log('Logging in...');
-client.login(process.env.DISCORD_TOKEN?.trim())
+client.login(process.env.DISCORD_TOKEN2?.trim())  // <-- use the correct variable
   .then(() => console.log('🚀 Login successful'))
   .catch(err => console.error('❌ Login failed:', err));
 
