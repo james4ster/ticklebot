@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 console.log('Running Node version:', process.version);
 
@@ -5,14 +6,16 @@ console.log('Running Node version:', process.version);
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import fs from 'fs';
+=======
+import 'dotenv/config';
+import { Client, GatewayIntentBits } from 'discord.js';
 
-// Bot functionality
-import { handleScheduleCommand } from './schedule.js';
-import { nhlEmojiMap } from './nhlEmojiMap.js';
-import { generateSeasonRecap } from './recap.js';
-import { handleGuildMemberAdd } from './welcome.js';
-import { parseSiriInput, postToDiscord } from './siriPost.js';
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+>>>>>>> minimal-render
 
+client.once('ready', () => console.log(`✅ Logged in as ${client.user.tag}`));
+
+<<<<<<< HEAD
 // === Discord Bot Setup ===
 const client = new Client({
   intents: [
@@ -165,3 +168,9 @@ console.log('Attempted Discord login...');
     console.error('❌ Discord login failed:', err);
   }
 })();
+=======
+console.log('Logging in...');
+client.login(process.env.DISCORD_TOKEN?.trim())
+  .then(() => console.log('🚀 Login successful'))
+  .catch(err => console.error('❌ Login failed:', err));
+>>>>>>> minimal-render
