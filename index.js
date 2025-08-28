@@ -153,7 +153,7 @@ client.on('interactionCreate', async interaction => {
       if (!ranking.length) return interaction.editReply('No ELO data found.');
 
       const formatted = ranking
-        .map((r, i) => `**${i + 1}. ${r.manager}** — ${r.elo.toFixed(0)}`)
+        .map((r, i) => `#${i + 1} ${r.manager} — ${r.elo.toFixed(0)}`)
         .join('\n');
 
       // Handle Discord 2000-char limit
