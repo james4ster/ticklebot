@@ -2,7 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import { Client, GatewayIntentBits } from 'discord.js';
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10000; // ✅ use Render's dynamic port
+app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
 
 // Express server to keep Render happy
 const app = express();
