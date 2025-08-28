@@ -1,18 +1,26 @@
-  import 'dotenv/config';
-  import express from 'express';
-  import { Client, GatewayIntentBits } from 'discord.js';
+// index.js
+import 'dotenv/config';
+import express from 'express';
+import { Client, GatewayIntentBits } from 'discord.js';
 
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+// --- Debug: check environment variable ---
+console.log('DISCORD_TOKEN raw:', JSON.stringify(process.env.DISCORD_TOKEN));
+console.log('Token length:', process.env.DISCORD_TOKEN?.length);
 
-  client.once('ready', () => console.log(`✅ Logged in as ${client.user.tag}`));
+// --- Minimal Discord bot ---
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-  console.log('Logging in...');
-  client.login(process.env.DISCORD_TOKEN?.trim())
-    .then(() => console.log('🚀 Login successful'))
-    .catch(err => console.error('❌ Login failed:', err));
+client.once('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
+});
 
-  const app = express();
-  const PORT = process.env.PORT || 10000;
+console.log('Logging in...');
+client.login(process.env.DISCORD_TOKEN)
+  .then(() => console.log('🚀 Login successful'))
+  .catch(err => console.error('❌ Login failed:', err));
 
-  app.get('/', (req, res) => res.send('Bot is alive!'));
-  app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
+// --- Express server to keep Render happy ---
+const app = express();
+const PORT = process.env.PORT || 10000;
+app.get('/', (req, res) => res.send('Bot is alive!'));
+app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
