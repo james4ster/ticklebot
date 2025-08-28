@@ -1,6 +1,6 @@
 // index.js
-require("dotenv").config();
-const { Client, GatewayIntentBits } = require("discord.js");
+import "dotenv/config.js"; // ✅ loads .env automatically
+import { Client, GatewayIntentBits } from "discord.js";
 
 // === Create Discord Client ===
 const client = new Client({
