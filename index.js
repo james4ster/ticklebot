@@ -46,6 +46,7 @@ client.once('ready', () => {
 
 // == ELO Rankings ==
 async function getEloRankings() {
+  console.log('📄 SPREADSHEET_ID:', process.env.SPREADSHEET_ID);
   const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
   const auth = new google.auth.GoogleAuth({
     credentials,
