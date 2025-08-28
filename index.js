@@ -1,4 +1,5 @@
 // === Imports ===
+console.log('📄 SPREADSHEET_ID env var:', process.env.SPREADSHEET_ID);
 
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
