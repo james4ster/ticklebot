@@ -1,38 +1,22 @@
-// index.js
-import 'dotenv/config'; // Loads .env automatically
+import 'dotenv/config';
 import express from 'express';
 import { Client, GatewayIntentBits } from 'discord.js';
 
-// === Discord Bot Setup ===
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds] // minimal intent
-});
+const PORT = process.env.PORT || 10000;
 
-// Triggered when bot logs in successfully
+// Express server to keep Render happy
+const app = express();
+app.get('/', (req, res) => res.send('Bot is alive!'));
+app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
+
+// Discord bot
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-// Debug token
-console.log('DISCORD_TOKEN:', process.env.DISCORD_TOKEN);
-console.log('Token length:', process.env.DISCORD_TOKEN?.length);
-
-// Attempt login
 console.log('Logging in...');
 client.login(process.env.DISCORD_TOKEN?.trim())
   .then(() => console.log('🚀 Login successful'))
   .catch(err => console.error('❌ Login failed:', err));
-
-// === Express Server to keep app alive / health check ===
-const app = express();
-
-// Health check endpoint
-app.get('/', (req, res) => {
-  res.send('🟢 TickleBot is alive and ready!');
-});
-
-// Use PORT from environment or default 3000
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🌐 Web server running on port ${PORT}`);
-});
