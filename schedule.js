@@ -7,7 +7,7 @@ export async function handleScheduleCommand(interaction) {
     await interaction.deferReply();
 
     const discordId = interaction.user.id;
-    const url = `https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?report=schedule&discordId=${discordId}`;
+    const url = `https://script.google.com/macros/s/AKfycbyMlsEWIiQOhojzLVe_VNirLVVhymltp1fMxLHH2XrVnQZbln2Qbhw36fDz6b1I4UqS/exec?report=schedule&discordId=${discordId}`;
 
     let json;
     try {
